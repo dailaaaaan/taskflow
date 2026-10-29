@@ -118,7 +118,7 @@ jobs:
 
       - name: Publish test report
         if: ${{ !cancelled() }}
-        uses: mikepenz/action-junit-report@v5
+        uses: mikepenz/action-junit-report@v6
         with:
           report_paths: build/reports/junit.xml
           check_name: Pest test report
@@ -127,7 +127,7 @@ jobs:
 
       - name: Upload test reports
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports
           path: build/reports
