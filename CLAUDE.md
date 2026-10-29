@@ -15,6 +15,7 @@
 | Runtime                 | PHP                                                                                                | 8.5 (constraint `^8.3`) |
 | Framework               | Laravel                                                                                            | 13.x                    |
 | Authentication          | Laravel Fortify (registration, password reset, 2FA, passkeys), from the official React starter kit | 1.x                     |
+| OAuth                   | Laravel Socialite (GitHub), optional ([ADR-0005](docs/adr/0005-github-login-account-linking.md))   | 5.x                     |
 | Server ↔ client bridge  | Inertia.js                                                                                         | 3.x                     |
 | UI                      | React 19, TypeScript (strict), Tailwind CSS 4, shadcn/ui, lucide-react                             | —                       |
 | Typed routes in TS      | Laravel Wayfinder                                                                                  | 0.1.x                   |
@@ -202,18 +203,20 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 
 ## 11. Commands
 
-| Task                                    | Command                                            |
-| --------------------------------------- | -------------------------------------------------- |
-| Start PostgreSQL                        | `docker compose up -d --wait`                      |
-| Run the app (server, Vite, queue, logs) | `composer run dev`                                 |
-| Full quality gate                       | `composer ci:check`                                |
-| PHP tests                               | `php artisan test` (add `--filter=Name` to narrow) |
-| Architecture tests only                 | `vendor/bin/pest --testsuite=Arch`                 |
-| Fix PHP style                           | `composer lint`                                    |
-| Static analysis                         | `composer types:check`                             |
-| Fix frontend lint and format            | `npm run check:fix`                                |
-| Reset local database                    | `php artisan migrate:fresh --seed`                 |
-| Install Git hooks after cloning         | `npm run prepare`                                  |
+| Task                                       | Command                                            |
+| ------------------------------------------ | -------------------------------------------------- |
+| Start PostgreSQL                           | `docker compose up -d --wait`                      |
+| Run the app (server, Vite, queue, logs)    | `composer run dev`                                 |
+| Full quality gate                          | `composer ci:check`                                |
+| PHP tests                                  | `php artisan test` (add `--filter=Name` to narrow) |
+| Architecture tests only                    | `vendor/bin/pest --testsuite=Arch`                 |
+| Browser tests only (needs `npm run build`) | `vendor/bin/pest --testsuite=Browser`              |
+| Install the Playwright browser             | `npx playwright install chromium`                  |
+| Fix PHP style                              | `composer lint`                                    |
+| Static analysis                            | `composer types:check`                             |
+| Fix frontend lint and format               | `npm run check:fix`                                |
+| Reset local database                       | `php artisan migrate:fresh --seed`                 |
+| Install Git hooks after cloning            | `npm run prepare`                                  |
 
 **Environment notes**
 
@@ -222,3 +225,5 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 - The test suite runs against the `taskflow_test` database (`phpunit.xml`), created by `docker/pgsql/create-testing-database.sql` on first start, and in CI by the `postgres` service.
 - `.npmrc` sets `ignore-scripts=true` to harden the supply chain, so Git hooks are installed explicitly with `npm run prepare`.
 - There is no local coverage driver. Coverage is measured in CI.
+- Browser tests use the **built** assets (`public/build`). Run `npm run build` first, and make sure no stale `public/hot` file exists, or pages will try to load the Vite dev server.
+- GitHub OAuth is optional. Locally `GITHUB_CLIENT_ID` is empty, so the feature is disabled. Its secrets are set by the owner only.

@@ -8,8 +8,8 @@
 | ----------------------------------------------- | -------------------- | ----------- |
 | 0 · Preparación del entorno                     | —                    | ✅          |
 | 1 · Esqueleto y estándares profesionales        | `chore/setup`        | ✅ v0.1.0   |
-| 2 · Base de datos y modelos                     | `feat/database`      | 🔄 En curso |
-| 3 · Autenticación (GitHub y tests de navegador) | `feat/auth`          | ⬜          |
+| 2 · Base de datos y modelos                     | `feat/database`      | ✅ v0.2.0   |
+| 3 · Autenticación (GitHub y tests de navegador) | `feat/auth`          | 🔄 En curso |
 | 4 · Equipos y roles                             | `feat/teams`         | ⬜          |
 | 5 · Tableros, listas y tarjetas                 | `feat/boards`        | ⬜          |
 | 6 · Drag & drop                                 | `feat/drag-and-drop` | ⬜          |
@@ -112,11 +112,27 @@ Issue: [#7](https://github.com/dailaaaaan/taskflow/issues/7) · Milestone: v0.2.
 
 ## Fase 3 · Autenticación · `feat/auth`
 
-| #   | Mensaje                                                      |
-| --- | ------------------------------------------------------------ |
-| 3.1 | `feat(auth): redirect to dashboard and customize auth pages` |
-| 3.2 | `feat(auth): add GitHub login with Socialite`                |
-| 3.3 | `test(browser): set up browser testing with auth journey`    |
+Issue: [#8](https://github.com/dailaaaaan/taskflow/issues/8) · Milestone: v0.3.0
+
+| #   | Mensaje                                                         | Qué incluye                                                               |
+| --- | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| 3.1 | `feat(ui): replace starter kit branding with the TaskFlow logo` | Logo, favicon (SVG + ICO) e icono de Apple                                |
+| 3.2 | `build: add Socialite and Pest browser testing dependencies`    | Socialite, plugin de navegador de Pest y Playwright                       |
+| 3.3 | `feat(auth): add GitHub login with Socialite`                   | Action, controller, migración, botón, 13 tests y corrección de `tabindex` |
+| 3.4 | `test(browser): cover the authentication journey in Chromium`   | 6 tests de navegador con axe, y Chromium en CI                            |
+| 3.5 | `docs: document GitHub login and prepare v0.3.0`                | ADR-0005, README, SECURITY, CLAUDE.md, TESTING, PLAN, CHANGELOG           |
+
+**✅ Hecho cuando:** el login con GitHub funciona (o se oculta si no está configurado) y los tests de navegador pasan en el CI.
+
+**🎓 Qué tienes que saber explicar**
+
+- Cómo funciona **OAuth**: TaskFlow → GitHub (el usuario autoriza) → callback con un `code` → Socialite lo canjea por los datos del usuario.
+- Por qué la cuenta se **vincula por email verificado** y qué es un ataque de **pre-account takeover**, y cómo lo evitamos borrando la contraseña de la cuenta no verificada.
+- Por qué entrar con GitHub **no se salta el 2FA**: se reutiliza el reto de Fortify.
+- Qué es un **feature flag**: sin `GITHUB_CLIENT_ID` no hay botón y las rutas devuelven 404.
+- Para qué sirve **`Socialite::fake()`**: probar el flujo sin conectarse a GitHub.
+- Qué es un **test de navegador** (Chromium real con Playwright) y en qué se diferencia de un feature test.
+- Qué es **axe** y por qué un `tabindex` positivo es un fallo de accesibilidad.
 
 ## Fase 4 · Equipos y roles · `feat/teams`
 
