@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-29
+
+### Added
+
+- Teams with **admin** and **member** roles. The creator of a team becomes its first admin.
+- `TeamPolicy` (view, update, delete, invite, manage members, leave), tested as a role × ability matrix.
+- Reusable **invite links**: HMAC-signed, role-scoped, expiring after 7 days and revocable. Guests log in and are brought back to the link ([ADR-0006](docs/adr/0006-signed-invite-links.md)).
+- Member management: change roles, remove members, leave a team.
+- Pages: dashboard with the user's teams, team overview, team settings (general, members, invite links, leave, delete) and invitation preview.
+- Browser tests for team creation and the invitation journey, with axe checks on the new pages.
+
+### Changed
+
+- Authorization is declared on routes (`->can()`), so it runs before validation.
+- API Resources are serialized without the `data` wrapper for Inertia props.
+- The sidebar links point to the TaskFlow repository and README.
+
+### Security
+
+- A team can never lose its last admin: demotions and removals lock the team's admin rows inside a transaction.
+- Invite links never change the role of an existing member.
+
 ## [0.3.0] - 2026-10-29
 
 ### Added
@@ -66,7 +88,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Possible null dereference when rendering a passkey's creation date in security settings.
 
-[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/dailaaaaan/taskflow/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/dailaaaaan/taskflow/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/dailaaaaan/taskflow/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/dailaaaaan/taskflow/releases/tag/v0.1.0

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -37,6 +38,10 @@ class AppServiceProvider extends ServiceProvider
         // Fail loudly on lazy loading (N+1), silently discarded attributes and
         // missing attributes while developing; stay lenient in production.
         Model::shouldBeStrict(! app()->isProduction());
+
+        // Inertia serializes resources through toResponse(); without this every
+        // prop would arrive wrapped in a `data` key.
+        JsonResource::withoutWrapping();
 
         DB::prohibitDestructiveCommands(
             app()->isProduction(),

@@ -9,5 +9,6 @@ An ADR captures one significant technical decision: the context, the options con
 | [0003](0003-integer-gap-positions.md)        | Integer positions with gaps for card and list ordering                    | Accepted |
 | [0004](0004-actions-and-policies.md)         | Actions for business logic and Policies for authorization                 | Accepted |
 | [0005](0005-github-login-account-linking.md) | Link GitHub logins by verified email and never bypass 2FA                 | Accepted |
+| [0006](0006-signed-invite-links.md)          | Invite members with signed, reusable invite links                         | Accepted |
 
 New ADRs start from [`template.md`](template.md).
