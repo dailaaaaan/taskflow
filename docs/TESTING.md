@@ -49,8 +49,12 @@ Coverage is measured in CI with PCOV. The target is **≥ 80 %** on `app/Actions
 
 Updated at the end of each phase.
 
-| Phase     | Suite                                   | Tests | Notes                                                                           |
-| --------- | --------------------------------------- | ----- | ------------------------------------------------------------------------------- |
-| 1 · Setup | Feature (starter kit auth and settings) | 39    | Registration, login, password reset, email verification, 2FA, passkeys, profile |
-| 1 · Setup | Unit                                    | 1     | Starter kit example                                                             |
-| 1 · Setup | Architecture                            | 9     | PHP and security presets, layering rules                                        |
+| Phase        | Suite                                   | Tests | Notes                                                                                 |
+| ------------ | --------------------------------------- | ----- | ------------------------------------------------------------------------------------- |
+| 1 · Setup    | Feature (starter kit auth and settings) | 39    | Registration, login, password reset, email verification, 2FA, passkeys, profile       |
+| 1 · Setup    | Unit                                    | 1     | Starter kit example                                                                   |
+| 1 · Setup    | Architecture                            | 9     | PHP and security presets, layering rules                                              |
+| 2 · Database | Feature (`tests/Feature/Models`)        | 10    | Membership roles and pivot, uniqueness, cascades, null-on-delete, ordering, date cast |
+| 2 · Database | Feature (`tests/Feature/Database`)      | 2     | Demo seeder: admin account, team, ordered lists and cards                             |
+
+All database tests run against **PostgreSQL 17** (`taskflow_test`), the same engine as production, so constraints and cascades are verified for real.

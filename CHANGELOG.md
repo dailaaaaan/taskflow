@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-29
+
+### Added
+
+- PostgreSQL 17 for local development via Docker Compose, with a dedicated `taskflow_test` database. The host port is configurable through `DB_PORT`.
+- Domain schema: `teams`, `memberships` (unique per team and user, role), `boards`, `board_lists` and `cards`, with foreign keys, cascading deletes and ordering indexes.
+- `TeamRole` backed enum and Eloquent models `Team`, `Membership` (custom pivot), `Board`, `BoardList` and `Card`, with typed relations and factories.
+- Demo seeder: `demo@taskflow.test` administers a team with one teammate and two boards of ordered lists and cards.
+
+### Changed
+
+- The test suite runs against PostgreSQL locally and in CI (a service container) instead of in-memory SQLite.
+- The CI quality job no longer needs a database.
+
+## [0.1.0] - 2026-10-29
+
 ### Added
 
 - Project scaffold: Laravel 13, Inertia 3 and React 19 from the official React starter kit, with authentication by Laravel Fortify (registration, login, password reset, email verification, 2FA, passkeys).
@@ -26,3 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Possible null dereference when rendering a passkey's creation date in security settings.
+
+[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/dailaaaaan/taskflow/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/dailaaaaan/taskflow/releases/tag/v0.1.0

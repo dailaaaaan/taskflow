@@ -1,0 +1,25 @@
+# Local development services. Production uses a managed PostgreSQL (see docs/adr).
+# Values come from .env, so the app and the container always agree.
+name: taskflow
+
+services:
+    pgsql:
+        image: postgres:17-alpine
+        ports:
+            - '${DB_PORT:-5432}:5432'
+        environment:
+            POSTGRES_DB: '${DB_DATABASE:-taskflow}'
+            POSTGRES_USER: '${DB_USERNAME:-taskflow}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-password}'
+        volumes:
+            - pgsql-data:/var/lib/postgresql/data
+            - ./docker/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql:ro
+        healthcheck:
+            # `$$` defers expansion to the container's own environment.
+            test: pg_isready -q -d $${POSTGRES_DB} -U $${POSTGRES_USER}
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+volumes:
+    pgsql-data:

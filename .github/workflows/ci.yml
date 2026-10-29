@@ -42,10 +42,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      # Installs dependencies, creates .env and builds assets. The build also
-      # generates the Wayfinder route types that the TypeScript checks need.
+      # No database here: static checks only need dependencies and the asset
+      # build, which also generates the Wayfinder route types used by tsc.
       - name: Setup application
-        run: composer setup
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate
+          npm ci
+          npm run build
 
       - name: PHP code style (Pint)
         run: composer lint:check
@@ -71,6 +76,26 @@ jobs:
     permissions:
       contents: read
       checks: write # publish the JUnit report as a check run
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: taskflow_test
+          POSTGRES_USER: taskflow
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U taskflow -d taskflow_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    # Real environment variables take precedence over .env, so the setup
+    # migrations and the test suite both target the service database.
+    env:
+      DB_DATABASE: taskflow_test
 
     steps:
       - name: Checkout code

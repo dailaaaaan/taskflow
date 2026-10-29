@@ -5,9 +5,12 @@ This guide describes how work moves from an idea to `main`. The engineering conv
 ## Development setup
 
 ```bash
-composer setup     # dependencies, .env, app key, migrations, asset build
-npm run prepare    # Git hooks (npm lifecycle scripts are disabled by .npmrc)
-composer run dev   # http://localhost:8000
+cp .env.example .env              # set DB_PORT if 5432 is already taken
+docker compose up -d --wait       # PostgreSQL (app and test databases)
+composer setup                    # dependencies, app key, migrations, asset build
+php artisan db:seed               # demo workspace
+npm run prepare                   # Git hooks (npm lifecycle scripts are disabled by .npmrc)
+composer run dev                  # http://localhost:8000
 ```
 
 ## Workflow
