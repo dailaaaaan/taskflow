@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\BoardColor;
 use App\Models\Board;
 use App\Models\BoardList;
 use App\Models\Card;
@@ -24,6 +25,24 @@ it('returns cards ordered by position, then by id', function () {
     $first = Card::factory()->for($list, 'boardList')->create(['position' => 1024]);
 
     expect($list->cards()->pluck('id')->all())->toBe([$first->id, $second->id]);
+});
+
+it('reaches the cards of all its lists, and only those', function () {
+    $board = Board::factory()->create();
+    $todo = BoardList::factory()->for($board)->create();
+    $done = BoardList::factory()->for($board)->create();
+    $cards = Card::factory()->for($todo, 'boardList')->count(2)->create()
+        ->merge(Card::factory()->for($done, 'boardList')->count(1)->create());
+    Card::factory()->create();
+
+    expect($board->cards()->pluck('cards.id')->sort()->values()->all())
+        ->toBe($cards->pluck('id')->sort()->values()->all());
+});
+
+it('casts the color to the BoardColor enum', function () {
+    $board = Board::factory()->create(['color' => 'rose']);
+
+    expect($board->fresh()?->color)->toBe(BoardColor::Rose);
 });
 
 it('cascades a team deletion to its boards, lists and cards', function () {
