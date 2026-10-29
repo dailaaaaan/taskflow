@@ -7,6 +7,9 @@ use App\Actions\Teams\CreateTeam;
 use App\Actions\Teams\RemoveTeamMember;
 use App\Enums\TeamRole;
 use App\Exceptions\TeamMustKeepAnAdmin;
+use App\Models\Board;
+use App\Models\BoardList;
+use App\Models\Card;
 use App\Models\Invitation;
 use App\Models\Membership;
 use App\Models\Team;
@@ -113,6 +116,22 @@ describe('RemoveTeamMember', function () {
 
         expect($team->roleOf($first))->toBeNull()
             ->and($team->roleOf($second))->toBe(TeamRole::Admin);
+    });
+
+    it('unassigns the cards of the removed member in that team only', function () {
+        $admin = User::factory()->create();
+        $member = User::factory()->create();
+        $team = Team::factory()->withMember($admin, TeamRole::Admin)->withMember($member)->create();
+        $list = BoardList::factory()->for(Board::factory()->for($team))->create();
+        $memberCard = Card::factory()->for($list, 'boardList')->create(['assignee_id' => $member->id]);
+        $adminCard = Card::factory()->for($list, 'boardList')->create(['assignee_id' => $admin->id]);
+        $otherTeamCard = Card::factory()->create(['assignee_id' => $member->id]);
+
+        app(RemoveTeamMember::class)->handle(membershipOf($team, $member));
+
+        expect($memberCard->fresh()?->assignee_id)->toBeNull()
+            ->and($adminCard->fresh()?->assignee_id)->toBe($admin->id)
+            ->and($otherTeamCard->fresh()?->assignee_id)->toBe($member->id);
     });
 
     it('refuses to remove the last admin', function () {

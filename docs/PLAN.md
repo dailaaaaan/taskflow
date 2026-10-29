@@ -10,8 +10,8 @@
 | 1 · Esqueleto y estándares profesionales        | `chore/setup`        | ✅ v0.1.0   |
 | 2 · Base de datos y modelos                     | `feat/database`      | ✅ v0.2.0   |
 | 3 · Autenticación (GitHub y tests de navegador) | `feat/auth`          | ✅ v0.3.0   |
-| 4 · Equipos y roles                             | `feat/teams`         | 🔄 En curso |
-| 5 · Tableros, listas y tarjetas                 | `feat/boards`        | ⬜          |
+| 4 · Equipos y roles                             | `feat/teams`         | ✅ v0.4.0   |
+| 5 · Tableros, listas y tarjetas                 | `feat/boards`        | 🔄 En curso |
 | 6 · Drag & drop                                 | `feat/drag-and-drop` | ⬜          |
 | 7 · Tiempo real                                 | `feat/realtime`      | ⬜          |
 | 8 · Pulido de UI y accesibilidad                | `feat/polish`        | ⬜          |
@@ -160,26 +160,42 @@ Issue: [#9](https://github.com/dailaaaaan/taskflow/issues/9) · Milestone: v0.4.
 
 ## Fase 5 · Tableros, listas y tarjetas · `feat/boards`
 
-| #   | Mensaje                                                 |
-| --- | ------------------------------------------------------- |
-| 5.1 | `feat(boards): create and list team boards`             |
-| 5.2 | `feat(boards): show board with lists and cards`         |
-| 5.3 | `feat(lists): create, rename and delete lists`          |
-| 5.4 | `feat(cards): create cards and edit details in a modal` |
-| 5.5 | `feat(boards): rename and delete boards (admin only)`   |
-| 5.6 | `test(browser): add board CRUD journey`                 |
+Issue: [#10](https://github.com/dailaaaaan/taskflow/issues/10) · Milestone: v0.5.0
+
+| #   | Mensaje                                                        | Qué incluye                                                                                                                                         |
+| --- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 5.1 | `feat(boards): add board policy, positions and create actions` | Capa de dominio: `BoardPolicy`, enum `BoardColor`, `Position`, `Board::cards()`, 3 Actions, 18 tests                                                |
+| 5.2 | `feat(teams): unassign the cards of members who leave a team`  | Al salir o ser expulsado de un equipo, sus tarjetas de ese equipo quedan sin asignar, 1 test                                                        |
+| 5.3 | `feat(boards): manage boards, lists and cards`                 | Capa HTTP y UI: rutas anidadas con `scopeBindings`, 3 controllers, 4 Form Requests, 3 API Resources, página del tablero, modal de tarjeta, 40 tests |
+| 5.4 | `test(browser): cover the board journey`                       | 3 tests de navegador con axe                                                                                                                        |
+| 5.5 | `docs: document boards and prepare v0.5.0`                     | ADR-0007, README, SECURITY, CLAUDE.md, TESTING, PLAN, CHANGELOG                                                                                     |
+
+**✅ Hecho cuando:** un miembro crea un tablero, añade listas y tarjetas y asigna una tarjeta a un compañero con fecha límite. No ve los botones de editar ni borrar el tablero, y si los fuerza el servidor responde 403.
+
+**🎓 Qué tienes que saber explicar**
+
+- Qué es un **agregado** y por qué listas y tarjetas se autorizan **a través del tablero** ([ADR-0007](adr/0007-authorize-lists-and-cards-through-the-board.md)): rutas anidadas y `scopeBindings`. Si alguien cambia en la URL el id de una tarjeta de otro tablero, recibe 404 (es el ataque llamado **IDOR**).
+- `->can('create', [Board::class, 'team'])`: una Policy con **contexto**. Al crear todavía no existe el tablero, así que se pasa la clase y el equipo.
+- Por qué existe la habilidad `collaborate` aunque hoy sea igual que `view`: si mañana hay un rol de "solo lectura", solo cambia un método.
+- **Eager loading** y el problema **N+1**: `load(['team', 'lists.cards.assignee'])` hace 4 consultas tenga el tablero 3 tarjetas o 3.000. El _strict mode_ lanza una excepción si se te olvida.
+- **Posiciones con huecos** (`Position::after`): por qué 1024, 2048… y no 1, 2, 3. En la Fase 6 mover una tarjeta será un único `UPDATE`.
+- `HasManyThrough`: `Board::cards()` llega a las tarjetas pasando por las listas.
+- Validación que depende de la ruta: `#[RouteParameter('board')]` en `rules()` y `Rule::exists('memberships', 'user_id')->where('team_id', …)`, para que solo se pueda asignar a compañeros.
+- Por qué al salir de un equipo se desasignan sus tarjetas: el dato guardado tiene que seguir cumpliendo la misma regla que la validación.
+- `<Form>` de Inertia con `resetOnSuccess`: el formulario de "Add a card" sigue abierto y vacío para añadir la siguiente.
+- Por qué los colores de Tailwind van como **clases completas** en un objeto: Tailwind solo genera las clases que encuentra escritas literalmente en el código.
 
 ## Fase 6 · Drag & drop · `feat/drag-and-drop`
 
-| #   | Mensaje                                                 |
-| --- | ------------------------------------------------------- |
-| 6.1 | `feat(board): add position helper with gap rebalancing` |
-| 6.2 | `feat(cards): add move card endpoint`                   |
-| 6.3 | `feat(board): add pure board reducer` (+ Vitest)        |
-| 6.4 | `feat(cards): drag and drop cards with dnd-kit`         |
-| 6.5 | `feat(lists): reorder lists with drag and drop`         |
-| 6.6 | `feat(board): add optimistic updates with rollback`     |
-| 6.7 | `test(browser): add drag and drop journey`              |
+| #   | Mensaje                                                    |
+| --- | ---------------------------------------------------------- |
+| 6.1 | `feat(board): add midpoint positions with gap rebalancing` |
+| 6.2 | `feat(cards): add move card endpoint`                      |
+| 6.3 | `feat(board): add pure board reducer` (+ Vitest)           |
+| 6.4 | `feat(cards): drag and drop cards with dnd-kit`            |
+| 6.5 | `feat(lists): reorder lists with drag and drop`            |
+| 6.6 | `feat(board): add optimistic updates with rollback`        |
+| 6.7 | `test(browser): add drag and drop journey`                 |
 
 ## Fase 7 · Tiempo real · `feat/realtime`
 

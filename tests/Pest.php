@@ -1,5 +1,9 @@
 <?php
 
+use App\Enums\TeamRole;
+use App\Models\Board;
+use App\Models\Team;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -44,7 +48,16 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * A board whose team has one admin and one member.
+ *
+ * @return array{Board, User, User}
+ */
+function boardWithAdminAndMember(): array
 {
-    // ..
+    $admin = User::factory()->create();
+    $member = User::factory()->create();
+    $team = Team::factory()->withMember($admin, TeamRole::Admin)->withMember($member)->create();
+
+    return [Board::factory()->for($team)->create(), $admin, $member];
 }

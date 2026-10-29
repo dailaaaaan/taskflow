@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $position
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
+ * @property-read Board $board Never null: board_id is required and cascades on delete.
  */
 #[Table('board_lists')]
 #[Fillable(['title', 'position'])]

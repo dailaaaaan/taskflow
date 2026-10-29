@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\BoardColor;
 use App\Models\Board;
 use App\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -21,7 +22,7 @@ class BoardFactory extends Factory
         return [
             'team_id' => Team::factory(),
             'title' => rtrim(fake()->sentence(3), '.'),
-            'color' => fake()->randomElement(['indigo', 'emerald', 'amber', 'rose', 'sky', 'violet']),
+            'color' => fake()->randomElement(BoardColor::cases()),
             'created_by' => null,
         ];
     }

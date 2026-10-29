@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $created_by
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
+ * @property-read BoardList $boardList Never null: board_list_id is required and cascades on delete.
+ * @property-read User|null $assignee
  */
 #[Fillable(['title', 'description', 'position', 'assignee_id', 'due_date'])]
 class Card extends Model

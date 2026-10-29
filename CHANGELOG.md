@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-29
+
+### Added
+
+- Boards: every team member creates boards with a title and an accent color; admins edit and delete them. The team page lists its boards with their list and card counts.
+- Board page with lists and cards ordered by `(position, id)`, loaded with eager loading in a fixed number of queries whatever the board size.
+- Lists: add, rename and delete (with their cards).
+- Cards: quick add at the bottom of a list (Enter adds the card and keeps the form open) and a details modal for title, description, assignee and due date. Overdue dates are highlighted.
+- `BoardPolicy` (view, create, collaborate, update, delete), tested as a role × ability matrix.
+- `App\Support\Position` appends lists and cards with gaps of 1024 ([ADR-0003](docs/adr/0003-integer-gap-positions.md)).
+- Browser tests for the board journey, with axe checks on the board page and the card modal.
+
+### Changed
+
+- Lists and cards are authorized through their board with nested, scoped routes instead of a policy per model ([ADR-0007](docs/adr/0007-authorize-lists-and-cards-through-the-board.md)).
+- Removing a member, or a member leaving, unassigns their cards in that team.
+
+### Fixed
+
+- The phase 4 rows of the test inventory in `docs/TESTING.md` were not rendered as part of the table.
+
+### Security
+
+- A list or card id from another board returns `404`, so ids cannot be swapped in the URL.
+- Card assignees are validated against the members of the board's team.
+
 ## [0.4.0] - 2026-10-29
 
 ### Added
@@ -88,7 +114,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Possible null dereference when rendering a passkey's creation date in security settings.
 
-[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/dailaaaaan/taskflow/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/dailaaaaan/taskflow/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/dailaaaaan/taskflow/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/dailaaaaan/taskflow/compare/v0.1.0...v0.2.0

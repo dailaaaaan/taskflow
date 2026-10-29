@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Teams;
 use App\Actions\Teams\CreateTeam;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Teams\SaveTeamRequest;
+use App\Http\Resources\BoardResource;
 use App\Http\Resources\InvitationResource;
 use App\Http\Resources\MemberResource;
 use App\Http\Resources\TeamResource;
+use App\Models\Board;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -35,6 +37,7 @@ final class TeamController extends Controller
         return Inertia::render('teams/show', [
             'team' => TeamResource::make($team),
             'members' => MemberResource::collection($team->memberships()->with('user')->adminsFirst()->get()),
+            'boards' => BoardResource::collection($team->boards()->withCount(['lists', 'cards'])->orderBy('title')->get()),
             'can' => $this->abilities($team, $user),
         ]);
     }
@@ -87,6 +90,7 @@ final class TeamController extends Controller
             'invite' => $user->can('invite', $team),
             'manageMembers' => $user->can('manageMembers', $team),
             'leave' => $user->can('leave', $team),
+            'createBoard' => $user->can('create', [Board::class, $team]),
         ];
     }
 }

@@ -7,7 +7,7 @@ export default function MemberAvatar({
     user,
     className,
 }: {
-    user: Member['user'];
+    user: Pick<Member['user'], 'name' | 'avatar'>;
     className?: string;
 }) {
     const getInitials = useInitials();

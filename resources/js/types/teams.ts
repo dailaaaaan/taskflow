@@ -46,4 +46,5 @@ export type TeamAbilities = {
     invite: boolean;
     manageMembers: boolean;
     leave: boolean;
+    createBoard: boolean;
 };
