@@ -1,19 +1,25 @@
 import { Head, Link } from '@inertiajs/react';
-import { KanbanSquare, Settings } from 'lucide-react';
+import { KanbanSquare, Plus, Settings } from 'lucide-react';
+import BoardController from '@/actions/App/Http/Controllers/Boards/BoardController';
+import { boardColorClasses } from '@/components/boards/board-colors';
+import BoardFormDialog from '@/components/boards/board-form-dialog';
 import MemberAvatar from '@/components/teams/member-avatar';
 import RoleBadge from '@/components/teams/role-badge';
 import { Button } from '@/components/ui/button';
+import { cn, pluralize } from '@/lib/utils';
 import { dashboard } from '@/routes';
+import { show as showBoard } from '@/routes/boards';
 import { edit, show } from '@/routes/teams';
-import type { Member, Team, TeamAbilities } from '@/types';
+import type { Board, Member, Team, TeamAbilities } from '@/types';
 
 type Props = {
     team: Team;
     members: Member[];
+    boards: Board[];
     can: TeamAbilities;
 };
 
-export default function TeamShow({ team, members }: Props) {
+export default function TeamShow({ team, members, boards, can }: Props) {
     const currentMember = members.find((member) => member.is_current_user);
 
     return (
@@ -60,21 +66,86 @@ export default function TeamShow({ team, members }: Props) {
                 </header>
 
                 <section aria-labelledby="boards-heading" className="space-y-4">
-                    <h2 id="boards-heading" className="text-lg font-semibold">
-                        Boards
-                    </h2>
-                    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-6 py-16 text-center">
-                        <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-                            <KanbanSquare className="size-6 text-muted-foreground" />
-                        </div>
-                        <h3 className="font-medium">No boards yet</h3>
-                        <p className="max-w-sm text-sm text-muted-foreground">
-                            Boards created by this team will appear here.
-                        </p>
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                        <h2
+                            id="boards-heading"
+                            className="text-lg font-semibold"
+                        >
+                            Boards
+                        </h2>
+                        {can.createBoard && boards.length > 0 && (
+                            <CreateBoardDialog team={team} />
+                        )}
                     </div>
+
+                    {boards.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed px-6 py-16 text-center">
+                            <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+                                <KanbanSquare className="size-6 text-muted-foreground" />
+                            </div>
+                            <div className="space-y-1">
+                                <h3 className="font-medium">No boards yet</h3>
+                                <p className="max-w-sm text-sm text-muted-foreground">
+                                    Boards hold the lists and cards your team
+                                    works on.
+                                </p>
+                            </div>
+                            {can.createBoard && (
+                                <CreateBoardDialog team={team} />
+                            )}
+                        </div>
+                    ) : (
+                        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                            {boards.map((board) => (
+                                <li key={board.id}>
+                                    <BoardLink board={board} />
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </section>
             </div>
         </>
+    );
+}
+
+function CreateBoardDialog({ team }: { team: Team }) {
+    return (
+        <BoardFormDialog
+            trigger={
+                <Button data-test="create-board-button">
+                    <Plus aria-hidden />
+                    New board
+                </Button>
+            }
+            title="Create a board"
+            description={`Every member of ${team.name} will be able to work on it.`}
+            form={BoardController.store.form(team.id)}
+            submitLabel="Create board"
+        />
+    );
+}
+
+function BoardLink({ board }: { board: Board }) {
+    return (
+        <Link
+            href={showBoard(board.id)}
+            className="group flex h-full flex-col overflow-hidden rounded-xl border bg-card transition-colors hover:border-primary/40 hover:bg-accent/40 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+        >
+            <span
+                className={cn('h-1.5', boardColorClasses[board.color])}
+                aria-hidden
+            />
+            <span className="flex flex-1 flex-col gap-4 p-5">
+                <h3 className="font-semibold group-hover:underline">
+                    {board.title}
+                </h3>
+                <span className="mt-auto text-sm text-muted-foreground">
+                    {pluralize(board.lists_count ?? 0, 'list')} ·{' '}
+                    {pluralize(board.cards_count ?? 0, 'card')}
+                </span>
+            </span>
+        </Link>
     );
 }
 

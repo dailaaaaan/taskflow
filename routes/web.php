@@ -1,12 +1,16 @@
 <?php
 
 use App\Http\Controllers\Auth\GitHubController;
+use App\Http\Controllers\Boards\BoardController;
+use App\Http\Controllers\Boards\CardController;
+use App\Http\Controllers\Boards\ListController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Teams\InvitationAcceptanceController;
 use App\Http\Controllers\Teams\InvitationController;
 use App\Http\Controllers\Teams\LeaveTeamController;
 use App\Http\Controllers\Teams\MemberController;
 use App\Http\Controllers\Teams\TeamController;
+use App\Models\Board;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -32,7 +36,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('teams/{team}', [TeamController::class, 'destroy'])->name('teams.destroy')->can('delete', 'team');
     Route::delete('teams/{team}/membership', LeaveTeamController::class)->name('teams.leave')->can('leave', 'team');
 
-    // Child resources are scoped: a membership or invitation of another team is a 404.
+    // Boards. Every member creates and works on boards; only admins edit or delete them.
+    Route::post('teams/{team}/boards', [BoardController::class, 'store'])->name('teams.boards.store')->can('create', [Board::class, 'team']);
+    Route::get('boards/{board}', [BoardController::class, 'show'])->name('boards.show')->can('view', 'board');
+    Route::patch('boards/{board}', [BoardController::class, 'update'])->name('boards.update')->can('update', 'board');
+    Route::delete('boards/{board}', [BoardController::class, 'destroy'])->name('boards.destroy')->can('delete', 'board');
+
+    // Child resources are scoped: a membership, invitation, list or card that
+    // belongs to another team or board is a 404.
     Route::scopeBindings()->group(function () {
         Route::patch('teams/{team}/members/{membership}', [MemberController::class, 'update'])
             ->name('teams.members.update')->can('manageMembers', 'team');
@@ -43,6 +54,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('teams.invitations.store')->can('invite', 'team');
         Route::delete('teams/{team}/invitations/{invitation}', [InvitationController::class, 'destroy'])
             ->name('teams.invitations.destroy')->can('invite', 'team');
+
+        Route::post('boards/{board}/lists', [ListController::class, 'store'])
+            ->name('boards.lists.store')->can('collaborate', 'board');
+        Route::patch('boards/{board}/lists/{list}', [ListController::class, 'update'])
+            ->name('boards.lists.update')->can('collaborate', 'board');
+        Route::delete('boards/{board}/lists/{list}', [ListController::class, 'destroy'])
+            ->name('boards.lists.destroy')->can('collaborate', 'board');
+
+        Route::post('boards/{board}/lists/{list}/cards', [CardController::class, 'store'])
+            ->name('boards.lists.cards.store')->can('collaborate', 'board');
+        Route::patch('boards/{board}/cards/{card}', [CardController::class, 'update'])
+            ->name('boards.cards.update')->can('collaborate', 'board');
+        Route::delete('boards/{board}/cards/{card}', [CardController::class, 'destroy'])
+            ->name('boards.cards.destroy')->can('collaborate', 'board');
     });
 
     // Invite links: path-only signatures that expire with the invitation.

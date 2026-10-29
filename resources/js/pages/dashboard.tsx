@@ -3,13 +3,10 @@ import { KanbanSquare, Users } from 'lucide-react';
 import Heading from '@/components/heading';
 import CreateTeamDialog from '@/components/teams/create-team-dialog';
 import RoleBadge from '@/components/teams/role-badge';
+import { pluralize } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import { show } from '@/routes/teams';
 import type { Team } from '@/types';
-
-function pluralize(count: number, word: string): string {
-    return `${count} ${word}${count === 1 ? '' : 's'}`;
-}
 
 export default function Dashboard({ teams }: { teams: Team[] }) {
     return (
