@@ -19,7 +19,7 @@
 | UI                      | React 19, TypeScript (strict), Tailwind CSS 4, shadcn/ui, lucide-react                             | —                       |
 | Typed routes in TS      | Laravel Wayfinder                                                                                  | 0.1.x                   |
 | Frontend toolchain      | Vite+ (`vp`): Vite, Oxlint, Oxfmt                                                                  | 1.4.x                   |
-| Database                | PostgreSQL 17 (Docker locally, Neon in production). SQLite until Phase 2                           | —                       |
+| Database                | PostgreSQL 17 (Docker locally, Neon in production). Tests use the `taskflow_test` database         | —                       |
 | Realtime                | Laravel broadcasting → Pusher Channels → Laravel Echo                                              | —                       |
 | Tests                   | Pest 5 (unit, feature, architecture, browser), Vitest, Playwright                                  | —                       |
 | Static analysis / style | Larastan **level 8**, Pint (`laravel` preset)                                                      | —                       |
@@ -204,6 +204,7 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 
 | Task                                    | Command                                            |
 | --------------------------------------- | -------------------------------------------------- |
+| Start PostgreSQL                        | `docker compose up -d --wait`                      |
 | Run the app (server, Vite, queue, logs) | `composer run dev`                                 |
 | Full quality gate                       | `composer ci:check`                                |
 | PHP tests                               | `php artisan test` (add `--filter=Name` to narrow) |
@@ -217,5 +218,7 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 **Environment notes**
 
 - Local development runs on Windows: Laravel Herd provides PHP 8.5 and Composer, and Docker Desktop provides PostgreSQL.
+- On the owner's machine port 5432 belongs to another project's container (`devtracker-postgres`). TaskFlow uses `DB_PORT=5433` in `.env`. Never stop or modify containers outside the `taskflow` Compose project.
+- The test suite runs against the `taskflow_test` database (`phpunit.xml`), created by `docker/pgsql/create-testing-database.sql` on first start, and in CI by the `postgres` service.
 - `.npmrc` sets `ignore-scripts=true` to harden the supply chain, so Git hooks are installed explicitly with `npm run prepare`.
 - There is no local coverage driver. Coverage is measured in CI.

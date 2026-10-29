@@ -23,7 +23,7 @@ TaskFlow lets teams organise work on Kanban boards and see each other's changes 
 
 - [x] Project foundation: CI pipeline, static analysis, architecture tests, Git hooks
 - [x] Authentication: registration, login, password reset, 2FA and passkeys
-- [ ] PostgreSQL schema: teams, memberships, boards, lists, cards
+- [x] PostgreSQL schema: teams, memberships, boards, lists, cards
 - [ ] Teams with **admin / member** roles and invite links
 - [ ] Boards, lists and cards (CRUD)
 - [ ] Drag & drop with optimistic updates
@@ -77,16 +77,19 @@ Every request goes through the same layers: **validate** (Form Request), **autho
 
 - PHP 8.3+ and Composer 2 ([Laravel Herd](https://herd.laravel.com) is the easiest option on Windows and macOS)
 - Node.js 22+
-- Docker (for PostgreSQL, from Phase 2)
+- Docker (runs PostgreSQL 17)
 
 ### Installation
 
 ```bash
 git clone https://github.com/dailaaaaan/taskflow.git
 cd taskflow
-composer setup     # PHP + JS dependencies, .env, app key, migrations, asset build
-npm run prepare    # install Git hooks (npm lifecycle scripts are disabled by .npmrc)
-composer run dev   # http://localhost:8000
+cp .env.example .env              # set DB_PORT if 5432 is already taken
+docker compose up -d --wait       # PostgreSQL with the app and test databases
+composer setup                    # PHP + JS dependencies, app key, migrations, asset build
+php artisan db:seed               # demo workspace (login: demo@taskflow.test / password)
+npm run prepare                   # Git hooks (npm lifecycle scripts are disabled by .npmrc)
+composer run dev                  # http://localhost:8000
 ```
 
 ## Quality and testing

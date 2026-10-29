@@ -7,8 +7,8 @@
 | Fase                                            | Rama                 | Estado      |
 | ----------------------------------------------- | -------------------- | ----------- |
 | 0 · Preparación del entorno                     | —                    | ✅          |
-| 1 · Esqueleto y estándares profesionales        | `chore/setup`        | 🔄 En curso |
-| 2 · Base de datos y modelos                     | `feat/database`      | ⬜          |
+| 1 · Esqueleto y estándares profesionales        | `chore/setup`        | ✅ v0.1.0   |
+| 2 · Base de datos y modelos                     | `feat/database`      | 🔄 En curso |
 | 3 · Autenticación (GitHub y tests de navegador) | `feat/auth`          | ⬜          |
 | 4 · Equipos y roles                             | `feat/teams`         | ⬜          |
 | 5 · Tableros, listas y tarjetas                 | `feat/boards`        | ⬜          |
@@ -87,15 +87,28 @@ git pull
 
 ## Fase 2 · Base de datos y modelos · `feat/database`
 
-| #   | Mensaje                                                    |
-| --- | ---------------------------------------------------------- |
-| 2.1 | `chore(db): add docker-compose with PostgreSQL`            |
-| 2.2 | `test: run the test suite against PostgreSQL` (local y CI) |
-| 2.3 | `feat(db): add teams and memberships with TeamRole enum`   |
-| 2.4 | `feat(db): add boards, lists and cards`                    |
-| 2.5 | `feat(db): add demo seeder`                                |
+Issue: [#7](https://github.com/dailaaaaan/taskflow/issues/7) · Milestone: v0.2.0
+
+| #   | Mensaje                                                          | Qué incluye                                                                          |
+| --- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| 2.1 | `build: sync package-lock.json with package name`                | Lockfile con el nombre `taskflow`                                                    |
+| 2.2 | `build(db): use PostgreSQL in development, tests and CI`         | docker-compose (puerto configurable), base de datos de test, servicio Postgres en CI |
+| 2.3 | `feat(db): add domain schema for teams, boards, lists and cards` | Enum `TeamRole`, 5 migraciones, 5 modelos, factories y 10 tests                      |
+| 2.4 | `feat(db): add demo seeder`                                      | Cuenta demo, equipo, 2 tableros con listas y tarjetas, y 2 tests                     |
+| 2.5 | `docs: document PostgreSQL setup and prepare v0.2.0`             | README, CLAUDE.md, CONTRIBUTING, TESTING, PLAN, CHANGELOG                            |
 
 **✅ Hecho cuando:** `php artisan migrate:fresh --seed` funciona y se ven los datos de ejemplo.
+
+**🎓 Qué tienes que saber explicar**
+
+- Qué es una **migración** y por qué no se edita una que ya está en `main`: se crea otra nueva.
+- **Claves foráneas** y sus acciones: `cascadeOnDelete` (al borrar un equipo se borran sus tableros) frente a `nullOnDelete` (al borrar un usuario sus tarjetas se quedan sin asignar).
+- Por qué hay **índices** en `team_id`, `user_id` y `(board_list_id, position)`: PostgreSQL no indexa las claves foráneas solo.
+- Qué es una tabla **pivot** (`memberships`) y por qué lleva su propio modelo con el **rol** casteado al **enum** `TeamRole`.
+- Las **relaciones** de Eloquent: `belongsTo`, `hasMany` y `belongsToMany`, con `->using()` y `->as('membership')`.
+- Qué son las **factories** y los **seeders**, y por qué los tests usan factories.
+- Por qué se testea contra **PostgreSQL** y no contra SQLite: es el mismo motor que producción, así que se comprueban las restricciones reales.
+- Por qué la clase se llama `BoardList` y no `List`: `list` es una palabra reservada de PHP.
 
 ## Fase 3 · Autenticación · `feat/auth`
 
