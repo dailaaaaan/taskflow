@@ -1,11 +1,14 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/react-starter-kit",
+    "name": "dailaaaaan/taskflow",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Real-time Kanban project manager with teams and role-based permissions, built with Laravel, Inertia and React.",
     "keywords": [
         "laravel",
-        "framework"
+        "inertia",
+        "react",
+        "kanban",
+        "realtime"
     ],
     "license": "MIT",
     "require": {
@@ -68,7 +71,7 @@
             "@test"
         ],
         "types:check": [
-            "phpstan analyse"
+            "phpstan analyse --memory-limit=1G"
         ],
         "test": [
             "@php artisan config:clear --ansi",
