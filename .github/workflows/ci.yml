@@ -118,6 +118,10 @@ jobs:
       - name: Setup application
         run: composer setup
 
+      # Browser tests (tests/Browser) drive a real Chromium through Playwright.
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
       - name: Run test suite with coverage
         shell: bash
         run: |
