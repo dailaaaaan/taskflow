@@ -25,7 +25,7 @@ TaskFlow lets teams organise work on Kanban boards and see each other's changes 
 - [x] Authentication: registration, login, password reset, 2FA, passkeys and GitHub OAuth
 - [x] PostgreSQL schema: teams, memberships, boards, lists, cards
 - [x] Teams with **admin / member** roles and signed invite links
-- [ ] Boards, lists and cards (CRUD)
+- [x] Boards, lists and cards, with assignees and due dates
 - [ ] Drag & drop with optimistic updates
 - [ ] Real-time collaboration and presence ("who is viewing")
 - [ ] Responsive, accessible UI with dark mode
