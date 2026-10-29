@@ -1,0 +1,4 @@
+{
+    "*.php": "php vendor/bin/pint",
+    "resources/js/**/*.{ts,tsx}": "vp check --fix --no-error-on-unmatched-pattern"
+}

@@ -1,0 +1,162 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+# Cancel superseded runs of the same branch/PR to save CI minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PHP_VERSION: '8.5'
+  NODE_VERSION: '24'
+
+jobs:
+  quality:
+    name: Quality (style, static analysis, audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Installs dependencies, creates .env and builds assets. The build also
+      # generates the Wayfinder route types that the TypeScript checks need.
+      - name: Setup application
+        run: composer setup
+
+      - name: PHP code style (Pint)
+        run: composer lint:check
+
+      - name: PHP static analysis (Larastan)
+        run: composer types:check
+
+      - name: Frontend lint and format (Vite+)
+        run: npm run check
+
+      - name: TypeScript
+        run: npm run types:check
+
+      - name: Dependency audit
+        run: |
+          composer audit
+          npm audit --omit=dev --audit-level=high
+
+  tests:
+    name: Tests (Pest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      checks: write # publish the JUnit report as a check run
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer:v2
+          coverage: pcov
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup application
+        run: composer setup
+
+      - name: Run test suite with coverage
+        shell: bash
+        run: |
+          mkdir -p build/reports
+          php artisan config:clear
+          vendor/bin/pest \
+            --colors=never \
+            --coverage \
+            --log-junit build/reports/junit.xml \
+            --coverage-clover build/reports/clover.xml \
+            | tee build/reports/pest-output.txt
+
+      - name: Write coverage to job summary
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          {
+            echo '### Test coverage'
+            echo '```'
+            cat build/reports/pest-output.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish test report
+        if: ${{ !cancelled() }}
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: build/reports/junit.xml
+          check_name: Pest test report
+          detailed_summary: true
+          include_passed: true
+
+      - name: Upload test reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: build/reports
+          retention-days: 14
+
+  commits:
+    name: Conventional commits
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint commit messages
+        run: >
+          npx commitlint
+          --from ${{ github.event.pull_request.base.sha }}
+          --to ${{ github.event.pull_request.head.sha }}
+          --verbose
