@@ -59,6 +59,11 @@ Updated at the end of each phase.
 | 3 · Auth     | Feature (`GitHubLoginTest`)             | 13    | Redirect, feature flag, new / returning / linked accounts, unverified takeover, 2FA hand-off, missing email, cancelled and expired OAuth, guest-only |
 | 3 · Auth     | Browser (`tests/Browser`)               | 6     | Register → verify notice, login → dashboard → logout, invalid credentials, axe accessibility and no JS errors on login, register and forgot-password |
 
-**Total after phase 3: 80 tests.**
+| 4 · Teams | Feature (`TeamPolicyTest`) | 7 | Role × ability matrix (admin / member / outsider) for 6 abilities, `roleOf()` |
+| 4 · Teams | Feature (`TeamActionsTest`) | 9 | CreateTeam, CreateInvitation, AcceptInvitation (never demotes), ChangeMemberRole and RemoveTeamMember with the last-admin invariant |
+| 4 · Teams | Feature (HTTP: management, members, invitations) | 33 | Dashboard scoping, CRUD, validation, **403 before validation**, 404 across teams, signed / tampered / unsigned / expired / revoked links, guest redirect |
+| 4 · Teams | Browser (`TeamJourneyTest`) | 3 | Create a team, join through an invite link after logging in, axe accessibility on dashboard, team and settings |
+
+**Total after phase 4: 132 tests.**
 
 All database tests run against **PostgreSQL 17** (`taskflow_test`), the same engine as production, so constraints and cascades are verified for real.

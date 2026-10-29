@@ -120,7 +120,9 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 
 **Backend**
 
-- **Controllers** are thin: no business logic and no `DB` facade (enforced by architecture tests). Authorize with `Gate::authorize()` and inject the authenticated user with `#[CurrentUser] User $user`.
+- **Controllers** are thin: no business logic and no `DB` facade (enforced by architecture tests). Inject the authenticated user with `#[CurrentUser] User $user`.
+- **Authorization is declared on the route** with `->can('ability', 'routeParam')`. The middleware runs before the Form Request validates, so unauthorized users get `403`, never validation errors. Use `Gate::authorize()` only when the subject is not a route parameter. Nested resources use `Route::scopeBindings()`, so a child of another team is a `404`.
+- **Expected domain failures** (for example `TeamMustKeepAnAdmin`) are exceptions implementing `ShouldntReport` with a `render()` method that flashes a toast. Controllers contain no `try/catch` for business rules.
 - **Validation** lives in one `FormRequest` per write endpoint. Use `validated()`, never `all()`.
 - **Authorization** lives in one Policy per aggregate (`TeamPolicy`, `BoardPolicy`, `CardPolicy`). It derives from team membership plus the `TeamRole` enum. The UI hides controls but the server always enforces.
 - **Business logic** lives in `app/Actions/<Domain>/<Verb><Noun>.php`: `final` classes with a single public `handle()` method and no HTTP dependencies (enforced by architecture tests). Multi-row writes are wrapped in `DB::transaction()`.

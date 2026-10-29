@@ -9,8 +9,8 @@
 | 0 · Preparación del entorno                     | —                    | ✅          |
 | 1 · Esqueleto y estándares profesionales        | `chore/setup`        | ✅ v0.1.0   |
 | 2 · Base de datos y modelos                     | `feat/database`      | ✅ v0.2.0   |
-| 3 · Autenticación (GitHub y tests de navegador) | `feat/auth`          | 🔄 En curso |
-| 4 · Equipos y roles                             | `feat/teams`         | ⬜          |
+| 3 · Autenticación (GitHub y tests de navegador) | `feat/auth`          | ✅ v0.3.0   |
+| 4 · Equipos y roles                             | `feat/teams`         | 🔄 En curso |
 | 5 · Tableros, listas y tarjetas                 | `feat/boards`        | ⬜          |
 | 6 · Drag & drop                                 | `feat/drag-and-drop` | ⬜          |
 | 7 · Tiempo real                                 | `feat/realtime`      | ⬜          |
@@ -136,16 +136,27 @@ Issue: [#8](https://github.com/dailaaaaan/taskflow/issues/8) · Milestone: v0.3.
 
 ## Fase 4 · Equipos y roles · `feat/teams`
 
-| #   | Mensaje                                                    |
-| --- | ---------------------------------------------------------- |
-| 4.1 | `feat(teams): add team policy with admin and member rules` |
-| 4.2 | `feat(teams): create team and list my teams`               |
-| 4.3 | `feat(teams): invite members with signed invite links`     |
-| 4.4 | `feat(teams): manage member roles and removal`             |
-| 4.5 | `feat(teams): allow members to leave a team`               |
-| 4.6 | `test(browser): add team invitation journey`               |
+Issue: [#9](https://github.com/dailaaaaan/taskflow/issues/9) · Milestone: v0.4.0
+
+| #   | Mensaje                                                           | Qué incluye                                                                                                               |
+| --- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 4.1 | `feat(teams): add team policy, invite links and membership rules` | Capa de dominio: `TeamPolicy`, modelo `Invitation`, 5 Actions, invariante del último admin con bloqueo de filas, 16 tests |
+| 4.2 | `feat(teams): manage teams, members and invite links`             | Capa HTTP y UI: rutas con `->can()`, controllers, Form Requests, API Resources, 4 páginas, 33 tests                       |
+| 4.3 | `test(browser): cover team creation and invitation journeys`      | 3 tests de navegador con axe                                                                                              |
+| 4.4 | `docs: document team roles and prepare v0.4.0`                    | ADR-0006, README, SECURITY, CLAUDE.md, TESTING, PLAN, CHANGELOG                                                           |
 
 **✅ Hecho cuando:** A invita a B, B entra como miembro, no ve los botones de admin, y si los fuerza el servidor responde 403.
+
+**🎓 Qué tienes que saber explicar**
+
+- Qué es una **Policy** y cómo se prueba como **matriz rol × habilidad** con datasets de Pest.
+- Por qué autorizamos en la **ruta** (`->can('update', 'team')`): se ejecuta **antes** de validar, así que quien no tiene permiso recibe 403 y no puede usar los errores de validación para averiguar nada.
+- **Route model binding con scope** (`scopeBindings`): un miembro de otro equipo devuelve 404.
+- Qué es un **invariante de dominio** ("siempre un admin") y por qué se usa **`lockForUpdate`** dentro de una transacción (condición de carrera entre dos admins).
+- Qué es un **savepoint** (transacción anidada) y por qué hace falta en PostgreSQL cuando salta una restricción única.
+- **URLs firmadas**: HMAC con `APP_KEY`, caducidad, 403 si se manipulan y 404 si se revocan. No se guarda ningún token secreto.
+- **Excepciones de dominio** con `render()` y `ShouldntReport`: errores esperados que se muestran como aviso y no ensucian los logs.
+- **API Resources**: deciden exactamente qué datos llegan al navegador.
 
 ## Fase 5 · Tableros, listas y tarjetas · `feat/boards`
 
