@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TeamRole;
 use Carbon\CarbonImmutable;
 use Database\Factories\TeamFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -15,6 +16,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
+ * @property-read int|null $memberships_count Present after withCount('memberships').
+ * @property-read int|null $boards_count Present after withCount('boards').
+ * @property-read Membership $membership Present when loaded through User::teams().
  */
 #[Fillable(['name'])]
 class Team extends Model
@@ -50,5 +54,21 @@ class Team extends Model
     public function boards(): HasMany
     {
         return $this->hasMany(Board::class);
+    }
+
+    /**
+     * @return HasMany<Invitation, $this>
+     */
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class);
+    }
+
+    /**
+     * The user's role in this team, or null when they are not a member.
+     */
+    public function roleOf(User $user): ?TeamRole
+    {
+        return $this->memberships()->firstWhere('user_id', $user->id)?->role;
     }
 }
