@@ -49,12 +49,16 @@ Coverage is measured in CI with PCOV. The target is **≥ 80 %** on `app/Actions
 
 Updated at the end of each phase.
 
-| Phase        | Suite                                   | Tests | Notes                                                                                 |
-| ------------ | --------------------------------------- | ----- | ------------------------------------------------------------------------------------- |
-| 1 · Setup    | Feature (starter kit auth and settings) | 39    | Registration, login, password reset, email verification, 2FA, passkeys, profile       |
-| 1 · Setup    | Unit                                    | 1     | Starter kit example                                                                   |
-| 1 · Setup    | Architecture                            | 9     | PHP and security presets, layering rules                                              |
-| 2 · Database | Feature (`tests/Feature/Models`)        | 10    | Membership roles and pivot, uniqueness, cascades, null-on-delete, ordering, date cast |
-| 2 · Database | Feature (`tests/Feature/Database`)      | 2     | Demo seeder: admin account, team, ordered lists and cards                             |
+| Phase        | Suite                                   | Tests | Notes                                                                                                                                                |
+| ------------ | --------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 · Setup    | Feature (starter kit auth and settings) | 39    | Registration, login, password reset, email verification, 2FA, passkeys, profile                                                                      |
+| 1 · Setup    | Unit                                    | 1     | Starter kit example                                                                                                                                  |
+| 1 · Setup    | Architecture                            | 9     | PHP and security presets, layering rules                                                                                                             |
+| 2 · Database | Feature (`tests/Feature/Models`)        | 10    | Membership roles and pivot, uniqueness, cascades, null-on-delete, ordering, date cast                                                                |
+| 2 · Database | Feature (`tests/Feature/Database`)      | 2     | Demo seeder: admin account, team, ordered lists and cards                                                                                            |
+| 3 · Auth     | Feature (`GitHubLoginTest`)             | 13    | Redirect, feature flag, new / returning / linked accounts, unverified takeover, 2FA hand-off, missing email, cancelled and expired OAuth, guest-only |
+| 3 · Auth     | Browser (`tests/Browser`)               | 6     | Register → verify notice, login → dashboard → logout, invalid credentials, axe accessibility and no JS errors on login, register and forgot-password |
+
+**Total after phase 3: 80 tests.**
 
 All database tests run against **PostgreSQL 17** (`taskflow_test`), the same engine as production, so constraints and cascades are verified for real.

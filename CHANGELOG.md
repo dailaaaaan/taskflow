@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-29
+
+### Added
+
+- "Continue with GitHub" sign-in (Laravel Socialite) on the login and register pages. Accounts are matched by GitHub id, then linked by verified email, otherwise created as verified accounts ([ADR-0005](docs/adr/0005-github-login-account-linking.md)).
+- GitHub sign-in hands users with two-factor authentication to Fortify's challenge, so the second factor is never bypassed.
+- `github_id` and `avatar` columns on users. GitHub avatars show up in the UI automatically.
+- Browser test suite (Pest Browser + Playwright, headless Chromium) covering registration, login, logout and invalid credentials, plus axe accessibility checks on the auth pages. Runs in CI.
+- TaskFlow logo, SVG/ICO favicon and Apple touch icon.
+
+### Changed
+
+- GitHub login is a feature flag: hidden, with `404` routes, until `GITHUB_CLIENT_ID` is configured.
+- `users.password` is nullable for accounts created through GitHub.
+
+### Fixed
+
+- Positive `tabindex` values on the login and register forms broke the natural keyboard order (axe rule `tabindex`).
+
+### Security
+
+- Linking GitHub to an existing unverified account discards that account's password, preventing pre-account takeover.
+
 ## [0.2.0] - 2026-10-29
 
 ### Added
@@ -43,6 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Possible null dereference when rendering a passkey's creation date in security settings.
 
-[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/dailaaaaan/taskflow/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/dailaaaaan/taskflow/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/dailaaaaan/taskflow/releases/tag/v0.1.0

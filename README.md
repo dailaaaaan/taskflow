@@ -22,7 +22,7 @@ TaskFlow lets teams organise work on Kanban boards and see each other's changes 
 ## Roadmap
 
 - [x] Project foundation: CI pipeline, static analysis, architecture tests, Git hooks
-- [x] Authentication: registration, login, password reset, 2FA and passkeys
+- [x] Authentication: registration, login, password reset, 2FA, passkeys and GitHub OAuth
 - [x] PostgreSQL schema: teams, memberships, boards, lists, cards
 - [ ] Teams with **admin / member** roles and invite links
 - [ ] Boards, lists and cards (CRUD)
@@ -35,7 +35,7 @@ TaskFlow lets teams organise work on Kanban boards and see each other's changes 
 
 | Area     | Technology                                                             |
 | -------- | ---------------------------------------------------------------------- |
-| Backend  | PHP 8.5, Laravel 13, Laravel Fortify                                   |
+| Backend  | PHP 8.5, Laravel 13, Laravel Fortify, Laravel Socialite (GitHub OAuth) |
 | Frontend | React 19, TypeScript (strict), Inertia.js 3, Tailwind CSS 4, shadcn/ui |
 | Database | PostgreSQL 17                                                          |
 | Realtime | Laravel broadcasting, Pusher Channels, Laravel Echo                    |
@@ -89,24 +89,33 @@ docker compose up -d --wait       # PostgreSQL with the app and test databases
 composer setup                    # PHP + JS dependencies, app key, migrations, asset build
 php artisan db:seed               # demo workspace (login: demo@taskflow.test / password)
 npm run prepare                   # Git hooks (npm lifecycle scripts are disabled by .npmrc)
+npx playwright install chromium   # browser for the browser test suite
 composer run dev                  # http://localhost:8000
 ```
 
+### Optional: GitHub login
+
+1. Create an OAuth App at <https://github.com/settings/developers> with the callback URL `http://localhost:8000/auth/github/callback`.
+2. Set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` in `.env`.
+
+While `GITHUB_CLIENT_ID` is empty, the "Continue with GitHub" button is hidden and its routes return `404`. See [ADR-0005](docs/adr/0005-github-login-account-linking.md) for how accounts are linked.
+
 ## Quality and testing
 
-| Gate                     | Tool                  | Command                |
-| ------------------------ | --------------------- | ---------------------- |
-| PHP code style           | Pint                  | `composer lint:check`  |
-| PHP static analysis      | Larastan, level 8     | `composer types:check` |
-| Frontend lint and format | Vite+ (Oxlint, Oxfmt) | `npm run check`        |
-| Type checking            | TypeScript (strict)   | `npm run types:check`  |
-| Tests                    | Pest                  | `php artisan test`     |
-| **Everything above**     |                       | `composer ci:check`    |
+| Gate                          | Tool                      | Command                               |
+| ----------------------------- | ------------------------- | ------------------------------------- |
+| PHP code style                | Pint                      | `composer lint:check`                 |
+| PHP static analysis           | Larastan, level 8         | `composer types:check`                |
+| Frontend lint and format      | Vite+ (Oxlint, Oxfmt)     | `npm run check`                       |
+| Type checking                 | TypeScript (strict)       | `npm run types:check`                 |
+| Tests                         | Pest                      | `php artisan test`                    |
+| Browser tests (Chromium, axe) | Pest Browser + Playwright | `vendor/bin/pest --testsuite=Browser` |
+| **Everything above**          |                           | `composer ci:check`                   |
 
 The CI pipeline runs on every push and pull request:
 
 - **Quality**: style, static analysis, lint, type checking and a dependency audit (`composer audit`, `npm audit`)
-- **Tests**: the full Pest suite with PCOV coverage, a JUnit report published as a check run, and reports uploaded as artifacts
+- **Tests**: the full Pest suite on PostgreSQL, including browser tests in headless Chromium, with PCOV coverage, a JUnit report published as a check run, and reports uploaded as artifacts
 - **Conventional commits**: every commit message in the pull request is validated
 
 The test strategy and the test inventory are documented in [`docs/TESTING.md`](docs/TESTING.md).
