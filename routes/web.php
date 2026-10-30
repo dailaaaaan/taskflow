@@ -61,11 +61,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('boards.lists.update')->can('collaborate', 'board');
         Route::delete('boards/{board}/lists/{list}', [ListController::class, 'destroy'])
             ->name('boards.lists.destroy')->can('collaborate', 'board');
+        Route::patch('boards/{board}/lists/{list}/move', [ListController::class, 'move'])
+            ->name('boards.lists.move')->can('collaborate', 'board');
 
         Route::post('boards/{board}/lists/{list}/cards', [CardController::class, 'store'])
             ->name('boards.lists.cards.store')->can('collaborate', 'board');
         Route::patch('boards/{board}/cards/{card}', [CardController::class, 'update'])
             ->name('boards.cards.update')->can('collaborate', 'board');
+        Route::patch('boards/{board}/cards/{card}/move', [CardController::class, 'move'])
+            ->name('boards.cards.move')->can('collaborate', 'board');
         Route::delete('boards/{board}/cards/{card}', [CardController::class, 'destroy'])
             ->name('boards.cards.destroy')->can('collaborate', 'board');
     });

@@ -2,11 +2,10 @@ import { Head, router } from '@inertiajs/react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import BoardController from '@/actions/App/Http/Controllers/Boards/BoardController';
-import AddListForm from '@/components/boards/add-list-form';
 import { boardColorClasses } from '@/components/boards/board-colors';
 import BoardFormDialog from '@/components/boards/board-form-dialog';
 import CardDialog from '@/components/boards/card-dialog';
-import ListColumn from '@/components/boards/list-column';
+import SortableBoard from '@/components/boards/sortable-board';
 import ConfirmDialog from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -98,28 +97,12 @@ export default function BoardShow({ board, lists, members, can }: Props) {
                     )}
                 </header>
 
-                <div
-                    className="flex flex-1 items-start gap-4 overflow-x-auto p-4 md:p-6"
-                    data-test="board-lists"
-                >
-                    {lists.map((list) => (
-                        <ListColumn
-                            key={list.id}
-                            board={board}
-                            list={list}
-                            canEdit={can.collaborate}
-                            onOpenCard={setOpenCardId}
-                        />
-                    ))}
-
-                    {can.collaborate && <AddListForm board={board} />}
-
-                    {lists.length === 0 && !can.collaborate && (
-                        <p className="text-sm text-muted-foreground">
-                            This board has no lists yet.
-                        </p>
-                    )}
-                </div>
+                <SortableBoard
+                    board={board}
+                    lists={lists}
+                    canEdit={can.collaborate}
+                    onOpenCard={setOpenCardId}
+                />
             </div>
 
             <CardDialog

@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-29
+
+### Added
+
+- Drag & drop of cards (within a list and across lists) and of lists, with dnd-kit ([ADR-0008](docs/adr/0008-drag-and-drop-with-optimistic-inertia-visits.md)):
+    - Mouse: drag from anywhere on a card or list title. A click without movement still opens the card.
+    - Touch: press and hold, so a quick swipe still scrolls the board.
+    - Keyboard: a labelled move handle on every card and list. ← → move between lists, ↑ ↓ within a list, Space or Enter drops, Escape cancels.
+    - Screen reader announcements with card and list titles.
+- Optimistic moves: the board updates at once, then reloads only its lists from the server. If the move fails, the board is restored and a toast explains why.
+- Move endpoints for cards and lists, with the destination list restricted to the same board.
+- `Position::between()` and `Position::insert()`: one write per move, and the list is renumbered only when two neighbours have no gap left.
+- Frontend unit tests with Vitest (`npm test`) for the pure board reducer and drag & drop helpers, run in CI and in `composer ci:check`.
+- Browser tests that move cards and lists with the keyboard, check the announcements, and cover the rollback after a rejected move.
+
+### Changed
+
+- The board page computes `lists` and `members` lazily, so partial reloads only run the queries they need.
+- The rotation of the dragged card was removed: dnd-kit measures that element to find drop targets.
+
+### Security
+
+- Moves lock the destination's rows inside a transaction, so concurrent moves cannot compute a position from the same snapshot.
+
 ## [0.5.0] - 2026-10-29
 
 ### Added
@@ -114,7 +138,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Possible null dereference when rendering a passkey's creation date in security settings.
 
-[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/dailaaaaan/taskflow/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/dailaaaaan/taskflow/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/dailaaaaan/taskflow/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/dailaaaaan/taskflow/compare/v0.2.0...v0.3.0

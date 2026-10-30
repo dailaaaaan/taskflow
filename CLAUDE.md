@@ -115,7 +115,7 @@ The owner (**@dailaaaaan**) is a junior developer building a portfolio project. 
 Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► Eloquent ─► PostgreSQL
             │            (validate)   (authorize) (logic)      │
             │                                                  └─► Event ─► Pusher ─► Echo (other clients)
-            └─► Inertia::render(page, props)   |   JSON (board interactions)
+            └─► Inertia::render(page, props)   |   back() + partial reload (board moves)
 ```
 
 **Backend**
@@ -138,6 +138,7 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 - Inertia pages go in `resources/js/pages`, domain components in `resources/js/components/<domain>`, and shadcn primitives in `resources/js/components/ui`.
 - URLs come from Wayfinder-generated functions. Never hardcode paths.
 - Board state is a **pure reducer** (`resources/js/lib/board-reducer.ts`). The same reducer applies optimistic updates and remote events, and it is unit-tested with Vitest.
+- Board moves are **optimistic Inertia visits**: `router.optimistic()` applies the reducer to the `lists` prop, the endpoint redirects back, and the client reloads `only: ['lists']`. Inertia rolls back on failure. Drag & drop uses dnd-kit ([ADR-0008](docs/adr/0008-drag-and-drop-with-optimistic-inertia-visits.md)).
 - No `any`. Realtime payloads are discriminated unions.
 - Accessibility: keyboard-operable drag & drop, labelled controls, visible focus.
 
@@ -213,6 +214,7 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 | PHP tests                                  | `php artisan test` (add `--filter=Name` to narrow) |
 | Architecture tests only                    | `vendor/bin/pest --testsuite=Arch`                 |
 | Browser tests only (needs `npm run build`) | `vendor/bin/pest --testsuite=Browser`              |
+| Frontend unit tests (Vitest)               | `npm test`                                         |
 | Install the Playwright browser             | `npx playwright install chromium`                  |
 | Fix PHP style                              | `composer lint`                                    |
 | Static analysis                            | `composer types:check`                             |

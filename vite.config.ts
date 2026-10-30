@@ -28,6 +28,11 @@ export default defineConfig({
             formVariants: true,
         }),
     ]),
+    test: {
+        // Pure TypeScript only (reducer and helpers): no DOM needed.
+        include: ['resources/js/**/*.test.ts'],
+        environment: 'node',
+    },
     server: {
         watch: {
             ignored: [

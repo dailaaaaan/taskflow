@@ -11,8 +11,8 @@
 | 2 · Base de datos y modelos                     | `feat/database`      | ✅ v0.2.0   |
 | 3 · Autenticación (GitHub y tests de navegador) | `feat/auth`          | ✅ v0.3.0   |
 | 4 · Equipos y roles                             | `feat/teams`         | ✅ v0.4.0   |
-| 5 · Tableros, listas y tarjetas                 | `feat/boards`        | 🔄 En curso |
-| 6 · Drag & drop                                 | `feat/drag-and-drop` | ⬜          |
+| 5 · Tableros, listas y tarjetas                 | `feat/boards`        | ✅ v0.5.0   |
+| 6 · Drag & drop                                 | `feat/drag-and-drop` | 🔄 En curso |
 | 7 · Tiempo real                                 | `feat/realtime`      | ⬜          |
 | 8 · Pulido de UI y accesibilidad                | `feat/polish`        | ⬜          |
 | 9 · Despliegue                                  | `chore/deploy`       | ⬜          |
@@ -48,9 +48,13 @@ git push -u origin <rama-de-la-fase>
 gh pr create --base main --title "<título>" --body-file <archivo que te da Claude>
 gh pr checks --watch            # espera a que el CI termine
 gh pr merge --merge --delete-branch
+gh pr view --json state -q .state   # tiene que decir MERGED antes de seguir
 git switch main
 git pull
+gh release create v0.X.0 --target main --title "<título>" --notes-file <archivo que te da Claude>
 ```
+
+> ⚠️ `gh pr checks --watch` termina cuando acaba el CI, **no** cuando se fusiona el PR. Crea la release solo después de ver `MERGED`: si no, la etiqueta apunta al `main` anterior (pasó con la v0.5.0).
 
 ---
 
@@ -187,15 +191,31 @@ Issue: [#10](https://github.com/dailaaaaan/taskflow/issues/10) · Milestone: v0.
 
 ## Fase 6 · Drag & drop · `feat/drag-and-drop`
 
-| #   | Mensaje                                                    |
-| --- | ---------------------------------------------------------- |
-| 6.1 | `feat(board): add midpoint positions with gap rebalancing` |
-| 6.2 | `feat(cards): add move card endpoint`                      |
-| 6.3 | `feat(board): add pure board reducer` (+ Vitest)           |
-| 6.4 | `feat(cards): drag and drop cards with dnd-kit`            |
-| 6.5 | `feat(lists): reorder lists with drag and drop`            |
-| 6.6 | `feat(board): add optimistic updates with rollback`        |
-| 6.7 | `test(browser): add drag and drop journey`                 |
+Issue: [#11](https://github.com/dailaaaaan/taskflow/issues/11) · Milestone: v0.6.0
+
+| #   | Mensaje                                                    | Qué incluye                                                                                                                        |
+| --- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 6.1 | `feat(board): add midpoint positions with gap rebalancing` | `Position::between()` e `insert()` (renumera solo cuando no queda hueco), 24 tests unitarios                                       |
+| 6.2 | `feat(board): add move endpoints for cards and lists`      | Actions `MoveCard` y `MoveList` con bloqueo de filas, 2 Form Requests, rutas, props diferidas en el tablero, 22 tests              |
+| 6.3 | `build: add dnd-kit and the Vitest test script`            | Dependencias `@dnd-kit/*` y el script `npm test`                                                                                   |
+| 6.4 | `feat(board): add a pure board reducer tested with Vitest` | `board-reducer.ts`, configuración de Vitest, Vitest en `composer ci:check` y en el CI, 12 tests                                    |
+| 6.5 | `feat(board): drag and drop cards and lists with dnd-kit`  | Tablero ordenable con ratón, táctil y teclado, avisos para lector de pantalla, guardado optimista con rollback, 15 tests de Vitest |
+| 6.6 | `test(browser): cover keyboard drag and drop and rollback` | 5 tests de navegador                                                                                                               |
+| 6.7 | `docs: document drag and drop and prepare v0.6.0`          | ADR-0008, README, SECURITY, CLAUDE.md, TESTING, PLAN, CHANGELOG                                                                    |
+
+**✅ Hecho cuando:** mueves una tarjeta a otra lista (con ratón o con teclado), recargas la página y sigue ahí. Si el servidor rechaza el movimiento, la tarjeta vuelve a su sitio y sale un aviso.
+
+**🎓 Qué tienes que saber explicar**
+
+- **Posiciones con huecos** ([ADR-0003](adr/0003-integer-gap-positions.md)): mover una tarjeta escribe **una sola fila** (el punto medio entre sus vecinas). Solo cuando dos vecinas quedan pegadas (1024 y 1025) se renumera la lista.
+- **`lockForUpdate`** en `MoveCard`: si dos personas sueltan tarjetas en la misma lista a la vez, la segunda espera a la primera y no calculan la posición con los mismos datos.
+- La convención del **índice "sin contar el elemento movido"**: el reducer de React y `Position::insert` de PHP usan la misma, por eso cliente y servidor siempre coinciden.
+- **Reducer puro**: misma entrada, misma salida, sin modificar nada. Por eso se prueba con Vitest sin navegador y en la Fase 7 servirá también para los eventos en tiempo real.
+- **Actualización optimista** ([ADR-0008](adr/0008-drag-and-drop-with-optimistic-inertia-visits.md)): `router.optimistic()` cambia la pantalla antes de que responda el servidor. Si falla, Inertia restaura el estado anterior y nosotros mostramos un aviso.
+- **Recarga parcial** (`only: ['lists']`) y **props diferidas** (closures en el controller): tras mover, el servidor solo vuelve a consultar las listas.
+- **Accesibilidad del drag & drop**: el asa (⠿) se activa con Espacio o Enter, las flechas mueven la tarjeta y los avisos describen cada paso para un lector de pantalla. Lo comprueban los tests de navegador.
+- Por qué el ratón y el teclado empiezan el arrastre en sitios distintos: Enter sobre la tarjeta tiene que seguir abriéndola.
+- Por qué quitamos la rotación de la tarjeta arrastrada: dnd-kit mide ese elemento para saber dónde la sueltas.
 
 ## Fase 7 · Tiempo real · `feat/realtime`
 
