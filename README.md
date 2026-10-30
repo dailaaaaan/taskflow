@@ -26,22 +26,22 @@ TaskFlow lets teams organise work on Kanban boards and see each other's changes 
 - [x] PostgreSQL schema: teams, memberships, boards, lists, cards
 - [x] Teams with **admin / member** roles and signed invite links
 - [x] Boards, lists and cards, with assignees and due dates
-- [ ] Drag & drop with optimistic updates
+- [x] Drag & drop of cards and lists (mouse, touch and keyboard) with optimistic updates
 - [ ] Real-time collaboration and presence ("who is viewing")
 - [ ] Responsive, accessible UI with dark mode
 - [ ] Production deployment with a demo account
 
 ## Tech stack
 
-| Area     | Technology                                                             |
-| -------- | ---------------------------------------------------------------------- |
-| Backend  | PHP 8.5, Laravel 13, Laravel Fortify, Laravel Socialite (GitHub OAuth) |
-| Frontend | React 19, TypeScript (strict), Inertia.js 3, Tailwind CSS 4, shadcn/ui |
-| Database | PostgreSQL 17                                                          |
-| Realtime | Laravel broadcasting, Pusher Channels, Laravel Echo                    |
-| Testing  | Pest 5 (unit, feature, architecture, browser), Vitest, Playwright      |
-| Quality  | Larastan (level 8), Pint, Vite+ (Oxlint, Oxfmt), commitlint, Husky     |
-| CI/CD    | GitHub Actions, Dependabot                                             |
+| Area     | Technology                                                                      |
+| -------- | ------------------------------------------------------------------------------- |
+| Backend  | PHP 8.5, Laravel 13, Laravel Fortify, Laravel Socialite (GitHub OAuth)          |
+| Frontend | React 19, TypeScript (strict), Inertia.js 3, Tailwind CSS 4, shadcn/ui, dnd-kit |
+| Database | PostgreSQL 17                                                                   |
+| Realtime | Laravel broadcasting, Pusher Channels, Laravel Echo                             |
+| Testing  | Pest 5 (unit, feature, architecture, browser), Vitest, Playwright               |
+| Quality  | Larastan (level 8), Pint, Vite+ (Oxlint, Oxfmt), commitlint, Husky              |
+| CI/CD    | GitHub Actions, Dependabot                                                      |
 
 ## Architecture
 
@@ -63,7 +63,7 @@ flowchart LR
         A --> E["Broadcast events"]
     end
 
-    UI -- "Inertia visits / JSON" --> R
+    UI -- "Inertia visits (optimistic moves)" --> R
     E -- "publish" --> Pusher[("Pusher Channels")]
     Pusher -- "WebSocket" --> Echo
     Echo --> UI
@@ -109,12 +109,13 @@ While `GITHUB_CLIENT_ID` is empty, the "Continue with GitHub" button is hidden a
 | Frontend lint and format      | Vite+ (Oxlint, Oxfmt)     | `npm run check`                       |
 | Type checking                 | TypeScript (strict)       | `npm run types:check`                 |
 | Tests                         | Pest                      | `php artisan test`                    |
+| Frontend unit tests           | Vitest (via Vite+)        | `npm test`                            |
 | Browser tests (Chromium, axe) | Pest Browser + Playwright | `vendor/bin/pest --testsuite=Browser` |
 | **Everything above**          |                           | `composer ci:check`                   |
 
 The CI pipeline runs on every push and pull request:
 
-- **Quality**: style, static analysis, lint, type checking and a dependency audit (`composer audit`, `npm audit`)
+- **Quality**: style, static analysis, lint, type checking, frontend unit tests (Vitest) and a dependency audit (`composer audit`, `npm audit`)
 - **Tests**: the full Pest suite on PostgreSQL, including browser tests in headless Chromium, with PCOV coverage, a JUnit report published as a check run, and reports uploaded as artifacts
 - **Conventional commits**: every commit message in the pull request is validated
 
