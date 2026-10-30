@@ -34,6 +34,19 @@ export type BoardList = {
     cards: Card[];
 };
 
+/** Someone on the board right now, as sent by routes/channels.php. */
+export type Viewer = Pick<Member['user'], 'id' | 'name' | 'avatar'>;
+
+/** Public settings for Laravel Echo, from App\Support\RealtimeConfig. */
+export type RealtimeConfig = {
+    key: string;
+    cluster: string | null;
+    /** Only set for a Pusher-compatible server; Pusher itself uses the cluster. */
+    host: string | null;
+    port: number;
+    scheme: string;
+};
+
 /** Mirrors App\Policies\BoardPolicy for the current user. UI hints only. */
 export type BoardAbilities = {
     update: boolean;

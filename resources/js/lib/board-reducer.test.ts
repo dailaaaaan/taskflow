@@ -183,3 +183,141 @@ describe('list/moved', () => {
         expect(board).toEqual(snapshot);
     });
 });
+
+describe('card/created', () => {
+    const board = [list(1, [10]), list(2, [])];
+
+    it('adds the card at the bottom of its list', () => {
+        const result = boardReducer(board, {
+            type: 'card/created',
+            listId: 1,
+            card: card(11),
+        });
+
+        expect(layout(result)).toEqual({ 1: [10, 11], 2: [] });
+        expect(result[1]).toBe(board[1]);
+    });
+
+    it('ignores a card that a reload already brought', () => {
+        expect(
+            boardReducer(board, {
+                type: 'card/created',
+                listId: 2,
+                card: card(10),
+            }),
+        ).toBe(board);
+    });
+
+    it('ignores a card of an unknown list', () => {
+        expect(
+            layout(
+                boardReducer(board, {
+                    type: 'card/created',
+                    listId: 999,
+                    card: card(11),
+                }),
+            ),
+        ).toEqual({ 1: [10], 2: [] });
+    });
+});
+
+describe('card/updated', () => {
+    const board = [list(1, [10, 11]), list(2, [20])];
+
+    it('replaces the card where it is', () => {
+        const updated = { ...card(11), title: 'Renamed' };
+        const result = boardReducer(board, {
+            type: 'card/updated',
+            card: updated,
+        });
+
+        expect(result[0].cards).toEqual([card(10), updated]);
+        expect(result[1]).toBe(board[1]);
+    });
+
+    it('keeps every list for a card that no longer exists', () => {
+        const result = boardReducer(board, {
+            type: 'card/updated',
+            card: card(999),
+        });
+
+        expect(result[0]).toBe(board[0]);
+        expect(result[1]).toBe(board[1]);
+    });
+});
+
+describe('card/deleted', () => {
+    const board = [list(1, [10, 11]), list(2, [20])];
+
+    it('removes the card from its list', () => {
+        const result = boardReducer(board, {
+            type: 'card/deleted',
+            cardId: 10,
+        });
+
+        expect(layout(result)).toEqual({ 1: [11], 2: [20] });
+        expect(result[1]).toBe(board[1]);
+    });
+
+    it('keeps every list for a card that was already gone', () => {
+        const result = boardReducer(board, {
+            type: 'card/deleted',
+            cardId: 999,
+        });
+
+        expect(result[0]).toBe(board[0]);
+        expect(result[1]).toBe(board[1]);
+    });
+});
+
+describe('list/created', () => {
+    const board = [list(1, [10])];
+
+    it('adds an empty list at the end of the board', () => {
+        const result = boardReducer(board, {
+            type: 'list/created',
+            list: { id: 2, title: 'Done', position: 2048 },
+        });
+
+        expect(result[1]).toEqual({
+            id: 2,
+            title: 'Done',
+            position: 2048,
+            cards: [],
+        });
+    });
+
+    it('ignores a list that a reload already brought', () => {
+        expect(
+            boardReducer(board, {
+                type: 'list/created',
+                list: { id: 1, title: 'Copy', position: 1 },
+            }),
+        ).toBe(board);
+    });
+});
+
+describe('list/renamed', () => {
+    it('changes the title and keeps the cards', () => {
+        const board = [list(1, [10]), list(2, [])];
+        const result = boardReducer(board, {
+            type: 'list/renamed',
+            listId: 1,
+            title: 'Backlog',
+        });
+
+        expect(result[0].title).toBe('Backlog');
+        expect(layout(result)[1]).toEqual([10]);
+        expect(result[1]).toBe(board[1]);
+    });
+});
+
+describe('list/deleted', () => {
+    it('removes the list with its cards', () => {
+        const board = [list(1, [10]), list(2, [20])];
+
+        expect(
+            layout(boardReducer(board, { type: 'list/deleted', listId: 1 })),
+        ).toEqual({ 2: [20] });
+    });
+});

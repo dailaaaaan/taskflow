@@ -4,25 +4,42 @@ import { useState } from 'react';
 import BoardController from '@/actions/App/Http/Controllers/Boards/BoardController';
 import { boardColorClasses } from '@/components/boards/board-colors';
 import BoardFormDialog from '@/components/boards/board-form-dialog';
+import BoardViewers from '@/components/boards/board-viewers';
 import CardDialog from '@/components/boards/card-dialog';
 import SortableBoard from '@/components/boards/sortable-board';
 import ConfirmDialog from '@/components/confirm-dialog';
 import { Button } from '@/components/ui/button';
+import { useBoardChannel } from '@/hooks/use-board-channel';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import { show as showBoard } from '@/routes/boards';
 import { show as showTeam } from '@/routes/teams';
-import type { Board, BoardAbilities, BoardList, Member, Team } from '@/types';
+import type {
+    Board,
+    BoardAbilities,
+    BoardList,
+    Member,
+    RealtimeConfig,
+    Team,
+} from '@/types';
 
 type Props = {
     team: Team;
     board: Board;
     lists: BoardList[];
     members: Member[];
+    realtime: RealtimeConfig | null;
     can: BoardAbilities;
 };
 
-export default function BoardShow({ board, lists, members, can }: Props) {
+export default function BoardShow({
+    board,
+    lists,
+    members,
+    realtime,
+    can,
+}: Props) {
+    const viewers = useBoardChannel(board.id, realtime);
     // Only the id is kept, so the modal always shows the latest server data.
     const [openCardId, setOpenCardId] = useState<number | null>(null);
     const openList = lists.find((list) =>
@@ -48,6 +65,7 @@ export default function BoardShow({ board, lists, members, can }: Props) {
                         <h1 className="truncate text-xl font-semibold tracking-tight">
                             {board.title}
                         </h1>
+                        <BoardViewers viewers={viewers} />
                     </div>
 
                     {(can.update || can.delete) && (
