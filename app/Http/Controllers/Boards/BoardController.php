@@ -34,15 +34,15 @@ final class BoardController extends Controller
 
     public function show(Board $board, #[CurrentUser] User $user): Response
     {
-        // One query per level instead of one per list and per card.
-        $board->load(['team', 'lists.cards.assignee']);
-
+        // Closures are only evaluated when the prop is requested, so the partial
+        // reload after a drag & drop move (`only: ['lists']`) skips the rest.
         return Inertia::render('boards/show', [
             'team' => TeamResource::make($board->team),
             'board' => BoardResource::make($board),
-            'lists' => BoardListResource::collection($board->lists),
+            // One query per level instead of one per list and per card.
+            'lists' => fn () => BoardListResource::collection($board->lists()->with('cards.assignee')->get()),
             // Possible assignees for the card modal.
-            'members' => MemberResource::collection($board->team->memberships()->with('user')->adminsFirst()->get()),
+            'members' => fn () => MemberResource::collection($board->team->memberships()->with('user')->adminsFirst()->get()),
             'can' => [
                 'update' => $user->can('update', $board),
                 'delete' => $user->can('delete', $board),

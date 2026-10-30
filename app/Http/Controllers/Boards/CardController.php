@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Boards;
 
 use App\Actions\Cards\CreateCard;
+use App\Actions\Cards\MoveCard;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Boards\MoveCardRequest;
 use App\Http\Requests\Boards\StoreCardRequest;
 use App\Http\Requests\Boards\UpdateCardRequest;
 use App\Models\Board;
@@ -30,6 +32,17 @@ final class CardController extends Controller
     public function update(UpdateCardRequest $request, Board $board, Card $card): RedirectResponse
     {
         $card->update($request->validated());
+
+        return back();
+    }
+
+    /**
+     * Drag & drop. The board page applies the move optimistically and then
+     * reloads only its lists from here, so the server stays the source of truth.
+     */
+    public function move(MoveCardRequest $request, Board $board, Card $card, MoveCard $moveCard): RedirectResponse
+    {
+        $moveCard->handle($card, $board->lists()->findOrFail($request->integer('list_id')), $request->integer('index'));
 
         return back();
     }

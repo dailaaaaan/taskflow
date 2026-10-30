@@ -171,8 +171,10 @@ it('redirects guests to the login page from every board endpoint', function () {
         ['POST', route('boards.lists.store', $board)],
         ['PATCH', route('boards.lists.update', [$board, $list])],
         ['DELETE', route('boards.lists.destroy', [$board, $list])],
+        ['PATCH', route('boards.lists.move', [$board, $list])],
         ['POST', route('boards.lists.cards.store', [$board, $list])],
         ['PATCH', route('boards.cards.update', [$board, $card])],
+        ['PATCH', route('boards.cards.move', [$board, $card])],
         ['DELETE', route('boards.cards.destroy', [$board, $card])],
     ];
 

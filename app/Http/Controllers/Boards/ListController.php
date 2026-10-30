@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Boards;
 
 use App\Actions\Lists\CreateList;
+use App\Actions\Lists\MoveList;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Boards\MoveListRequest;
 use App\Http\Requests\Boards\SaveListRequest;
 use App\Models\Board;
 use App\Models\BoardList;
@@ -26,6 +28,16 @@ final class ListController extends Controller
     public function update(SaveListRequest $request, Board $board, BoardList $list): RedirectResponse
     {
         $list->update($request->validated());
+
+        return back();
+    }
+
+    /**
+     * Drag & drop, applied optimistically on the board page like card moves.
+     */
+    public function move(MoveListRequest $request, Board $board, BoardList $list, MoveList $moveList): RedirectResponse
+    {
+        $moveList->handle($list, $request->integer('index'));
 
         return back();
     }
