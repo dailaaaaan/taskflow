@@ -169,6 +169,67 @@ jobs:
           path: build/reports
           retention-days: 14
 
+  e2e:
+    name: Realtime E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: taskflow_test
+          POSTGRES_USER: taskflow
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U taskflow -d taskflow_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_DATABASE: taskflow_test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup application
+        run: composer setup
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Two browsers against a local Reverb server: see playwright.config.ts.
+      - name: Run two-user journey
+        run: npm run e2e
+
+      - name: Upload failure traces
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-traces
+          path: test-results
+          retention-days: 7
+
   commits:
     name: Conventional commits
     if: github.event_name == 'pull_request'
