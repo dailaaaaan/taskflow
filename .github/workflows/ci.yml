@@ -64,6 +64,9 @@ jobs:
       - name: TypeScript
         run: npm run types:check
 
+      - name: Frontend unit tests (Vitest)
+        run: npm test
+
       - name: Dependency audit
         run: |
           composer audit
