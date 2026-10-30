@@ -34,6 +34,7 @@
 | `php artisan test --filter=BoardPolicy` | Tests matching a name              |
 | `vendor/bin/pest --testsuite=Arch`      | Architecture tests only            |
 | `npm test`                              | Frontend unit tests (Vitest)       |
+| `npm run e2e`                           | Realtime E2E (needs a build)       |
 | `composer ci:check`                     | Full quality gate, including tests |
 
 ## Reports and records
@@ -73,6 +74,15 @@ Updated at the end of each phase.
 | 6 · Drag & drop | Browser (`DragAndDropTest`)                                  | 5     | Keyboard moves across lists, within a list and of lists, with their screen reader announcements; rollback and error toast after a rejected move; axe                                                                                  |
 | 6 · Drag & drop | Frontend unit (Vitest)                                       | 27    | Board reducer (moves, clamping, identity of unchanged lists, no mutation) and drag & drop helpers (drop targets, keyboard targets)                                                                                                    |
 
-**Total after phase 6: 268 tests** (241 Pest + 27 Vitest).
+| 7 · Realtime | Feature (`BoardChannelTest`) | 5 | Presence channel with the real Pusher driver, signed locally: admin and member join, non-members, members of another team and guests get 403 |
+| 7 · Realtime | Feature (`BoardBroadcastTest`, `BroadcastFailureTest`) | 12 | Each of the eight events: channel, payload and `toOthers()`; payload limit with escaped characters; rejected changes send nothing; a failing broadcaster keeps the change |
+| 7 · Realtime | Feature (`RealtimeConfigTest`) | 4 | Live updates off without Pusher or a key, public settings only, Pusher-compatible host |
+| 7 · Realtime | Architecture | +1 | Every event broadcasts synchronously and is rescued |
+| 7 · Realtime | Frontend unit (Vitest) | +11 | Remote actions: created, updated, deleted and renamed, including items that already exist or no longer do |
+| 7 · Realtime | E2E (`e2e/realtime.spec.ts`) | 1 | Two users in two browsers: presence, create, move, edit, list create and rename, delete, `X-Socket-ID`, leaving the board |
+
+**Total after phase 7: 302 tests** (263 Pest + 38 Vitest + 1 E2E).
+
+The E2E test runs a local [Reverb](https://reverb.laravel.com) server with throwaway keys, so the real Pusher driver and `pusher-js` are exercised with no external network and no secrets. It reseeds the `taskflow_test` database, never the development one.
 
 All database tests run against **PostgreSQL 17** (`taskflow_test`), the same engine as production, so constraints and cascades are verified for real.

@@ -27,7 +27,7 @@ TaskFlow lets teams organise work on Kanban boards and see each other's changes 
 - [x] Teams with **admin / member** roles and signed invite links
 - [x] Boards, lists and cards, with assignees and due dates
 - [x] Drag & drop of cards and lists (mouse, touch and keyboard) with optimistic updates
-- [ ] Real-time collaboration and presence ("who is viewing")
+- [x] Real-time collaboration and presence ("who is viewing")
 - [ ] Responsive, accessible UI with dark mode
 - [ ] Production deployment with a demo account
 
@@ -100,6 +100,13 @@ composer run dev                  # http://localhost:8000
 
 While `GITHUB_CLIENT_ID` is empty, the "Continue with GitHub" button is hidden and its routes return `404`. See [ADR-0005](docs/adr/0005-github-login-account-linking.md) for how accounts are linked.
 
+### Optional: live updates
+
+1. Create a Channels app at <https://dashboard.pusher.com> (the free plan is enough).
+2. Set `BROADCAST_CONNECTION=pusher` and the `PUSHER_APP_ID`, `PUSHER_APP_KEY`, `PUSHER_APP_SECRET` and `PUSHER_APP_CLUSTER` values in `.env`.
+
+Without them everything works, except that other people's changes only appear after a reload. See [ADR-0009](docs/adr/0009-realtime-board-events.md).
+
 ## Quality and testing
 
 | Gate                          | Tool                      | Command                               |
@@ -111,12 +118,14 @@ While `GITHUB_CLIENT_ID` is empty, the "Continue with GitHub" button is hidden a
 | Tests                         | Pest                      | `php artisan test`                    |
 | Frontend unit tests           | Vitest (via Vite+)        | `npm test`                            |
 | Browser tests (Chromium, axe) | Pest Browser + Playwright | `vendor/bin/pest --testsuite=Browser` |
-| **Everything above**          |                           | `composer ci:check`                   |
+| Realtime E2E (two browsers)   | Playwright + local Reverb | `npm run e2e`                         |
+| **Everything but the E2E**    |                           | `composer ci:check`                   |
 
 The CI pipeline runs on every push and pull request:
 
 - **Quality**: style, static analysis, lint, type checking, frontend unit tests (Vitest) and a dependency audit (`composer audit`, `npm audit`)
 - **Tests**: the full Pest suite on PostgreSQL, including browser tests in headless Chromium, with PCOV coverage, a JUnit report published as a check run, and reports uploaded as artifacts
+- **Realtime E2E**: two browsers on the same board, against a local Reverb server
 - **Conventional commits**: every commit message in the pull request is validated
 
 The test strategy and the test inventory are documented in [`docs/TESTING.md`](docs/TESTING.md).

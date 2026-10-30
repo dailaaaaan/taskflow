@@ -129,7 +129,7 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 - **Models**: explicit `$fillable`, a `casts()` method, relations typed with generics (`@return HasMany<Card, $this>`), and no business logic. The list model is **`BoardList`**, because `list` is a reserved word in PHP.
 - **Data sent to the frontend** goes through API Resources only, never raw models.
 - **Enums**: backed string enums in `app/Enums`.
-- **Realtime**: events implement `ShouldBroadcastNow` (free hosting has no queue worker). There is one presence channel per board, `board.{id}`, authorized in `routes/channels.php` by reusing `BoardPolicy::view`. Events are dispatched with `->toOthers()`.
+- **Realtime**: events extend `App\Events\BoardEvent`, which implements `ShouldBroadcastNow` (free hosting has no queue worker) and `ShouldRescue` (a failed broadcast never fails the request). There is one presence channel per board, `board.{id}`, authorized in `routes/channels.php` by reusing `BoardPolicy::view`. Actions dispatch events with `->toOthers()`, after the transaction, and the payload is a `BoardAction` of the reducer ([ADR-0009](docs/adr/0009-realtime-board-events.md)).
 - **Ordering**: integer `position` with gaps, rebalanced inside a transaction when exhausted ([ADR-0003](docs/adr/0003-integer-gap-positions.md)).
 - **Queries**: eager-load explicitly. Strict mode makes N+1 queries throw in development and tests.
 
@@ -139,6 +139,7 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 - URLs come from Wayfinder-generated functions. Never hardcode paths.
 - Board state is a **pure reducer** (`resources/js/lib/board-reducer.ts`). The same reducer applies optimistic updates and remote events, and it is unit-tested with Vitest.
 - Board moves are **optimistic Inertia visits**: `router.optimistic()` applies the reducer to the `lists` prop, the endpoint redirects back, and the client reloads `only: ['lists']`. Inertia rolls back on failure. Drag & drop uses dnd-kit ([ADR-0008](docs/adr/0008-drag-and-drop-with-optimistic-inertia-visits.md)).
+- Remote events reach the `lists` prop through `router.replaceProp()` and the same reducer (`resources/js/hooks/use-board-channel.ts`). Connection settings arrive as a page prop, never as `VITE_*` variables.
 - No `any`. Realtime payloads are discriminated unions.
 - Accessibility: keyboard-operable drag & drop, labelled controls, visible focus.
 
@@ -215,6 +216,7 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 | Architecture tests only                    | `vendor/bin/pest --testsuite=Arch`                 |
 | Browser tests only (needs `npm run build`) | `vendor/bin/pest --testsuite=Browser`              |
 | Frontend unit tests (Vitest)               | `npm test`                                         |
+| Realtime E2E (needs `npm run build`)       | `npm run e2e`                                      |
 | Install the Playwright browser             | `npx playwright install chromium`                  |
 | Fix PHP style                              | `composer lint`                                    |
 | Static analysis                            | `composer types:check`                             |
@@ -231,3 +233,6 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 - There is no local coverage driver. Coverage is measured in CI.
 - Browser tests use the **built** assets (`public/build`). Run `npm run build` first, and make sure no stale `public/hot` file exists, or pages will try to load the Vite dev server.
 - GitHub OAuth is optional. Locally `GITHUB_CLIENT_ID` is empty, so the feature is disabled. Its secrets are set by the owner only.
+- Live updates are optional too: they turn on with `BROADCAST_CONNECTION=pusher` and the `PUSHER_*` values, which only the owner sets. The E2E test needs neither, because it starts a local Reverb server with throwaway keys (`playwright.config.ts`) and reseeds the `taskflow_test` database.
+- `composer` is a `.bat` file on Windows, so `^` in a version constraint is swallowed by `cmd`. Require a package without a version, or edit `composer.json`.
+- A new or changed CI step is tried locally with the `CI` variable set before handing it over: tools such as `laravel-vite-plugin` behave differently under it.
