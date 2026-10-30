@@ -12,8 +12,8 @@
 | 3 · Autenticación (GitHub y tests de navegador) | `feat/auth`          | ✅ v0.3.0   |
 | 4 · Equipos y roles                             | `feat/teams`         | ✅ v0.4.0   |
 | 5 · Tableros, listas y tarjetas                 | `feat/boards`        | ✅ v0.5.0   |
-| 6 · Drag & drop                                 | `feat/drag-and-drop` | 🔄 En curso |
-| 7 · Tiempo real                                 | `feat/realtime`      | ⬜          |
+| 6 · Drag & drop                                 | `feat/drag-and-drop` | ✅ v0.6.0   |
+| 7 · Tiempo real                                 | `feat/realtime`      | 🔄 En curso |
 | 8 · Pulido de UI y accesibilidad                | `feat/polish`        | ⬜          |
 | 9 · Despliegue                                  | `chore/deploy`       | ⬜          |
 | 10 · README final de portfolio                  | `docs/readme`        | ⬜          |
@@ -219,16 +219,35 @@ Issue: [#11](https://github.com/dailaaaaan/taskflow/issues/11) · Milestone: v0.
 
 ## Fase 7 · Tiempo real · `feat/realtime`
 
-| #   | Mensaje                                                          |
-| --- | ---------------------------------------------------------------- |
-| 7.1 | `feat(realtime): configure Pusher broadcasting and Echo`         |
-| 7.2 | `feat(realtime): authorize board presence channel by membership` |
-| 7.3 | `feat(realtime): broadcast card and list events`                 |
-| 7.4 | `feat(realtime): apply live events on the board`                 |
-| 7.5 | `feat(realtime): show who is viewing the board`                  |
-| 7.6 | `test(e2e): verify live updates between two users`               |
+Issue: [#12](https://github.com/dailaaaaan/taskflow/issues/12) · Milestone: v0.7.0
+
+| #   | Mensaje                                                     | Qué incluye                                                                                               |
+| --- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| 7.1 | `build: add Pusher, Echo and the E2E test runner`           | SDK de Pusher, `laravel-echo`, `pusher-js`, Reverb y `@playwright/test` (estos dos, solo para desarrollo) |
+| 7.2 | `feat(realtime): authorize the board presence channel`      | `routes/channels.php`, claves en `.env.example`, 5 tests                                                  |
+| 7.3 | `feat(realtime): broadcast card and list changes`           | 8 eventos, 4 Actions nuevas, regla de arquitectura, 13 tests                                              |
+| 7.4 | `fix(ui): keep card details aligned with the card edge`     | Arregla una regresión visual de la Fase 6                                                                 |
+| 7.5 | `feat(realtime): apply live events and show who is viewing` | Reducer ampliado, `useBoardChannel`, avatares de quién está en el tablero, 4 tests y 11 de Vitest         |
+| 7.6 | `test(e2e): verify live updates between two users`          | Playwright con dos navegadores, job nuevo en el CI                                                        |
+| 7.7 | `docs: document real-time collaboration and prepare v0.7.0` | ADR-0009, README, SECURITY, CLAUDE.md, TESTING, PLAN, CHANGELOG                                           |
 
 **✅ Hecho cuando:** con dos navegadores, lo que haces en uno aparece en el otro sin recargar.
+
+**🎓 Qué tienes que saber explicar**
+
+- El **viaje de un cambio** ([ADR-0009](adr/0009-realtime-board-events.md)): Action → evento → Pusher → WebSocket → `useBoardChannel` → `boardReducer` → pantalla del otro usuario.
+- **Canal de presencia**: además de recibir eventos, sabe quién está conectado. Se autoriza en `routes/channels.php` con la misma Policy que la página.
+- **`toOthers()` y `X-Socket-ID`**: el navegador dice qué conexión hizo el cambio para que el servidor no se lo devuelva a él mismo.
+- **`ShouldBroadcastNow`** (sin cola, porque el hosting gratis no tiene worker) y **`ShouldRescue`** (si Pusher cae, el cambio ya está guardado y el usuario no ve un error).
+- **Por qué los eventos llevan una acción del reducer**: el mismo código aplica tus movimientos y los de los demás, y solo hay que probarlo una vez.
+- **Idempotencia**: un evento puede llegar después de una recarga que ya traía ese cambio, así que aplicarlo dos veces no debe duplicar nada.
+- **El límite de 10 KB de Pusher** y el evento `board/stale`: si el cambio no cabe, se avisa para recargar.
+- **Por qué la configuración va como prop** y no como `VITE_*`: la clave pública se decide al ejecutar, no al compilar, y `null` apaga el tiempo real.
+- **Qué es público y qué es secreto**: `PUSHER_APP_KEY` puede verse en el navegador; `PUSHER_APP_SECRET` jamás sale del servidor.
+- **Reverb en el E2E**: habla el mismo protocolo que Pusher, así que probamos el código real sin red externa ni secretos.
+- **Limitaciones conocidas** (saber decirlas es de senior): están en el ADR-0009, por ejemplo que un miembro expulsado sigue recibiendo eventos hasta que sale del tablero.
+
+📌 **Pendiente:** cambiar `laravel/reverb` de `dev-main` a una versión estable cuando salga una compatible con Guzzle 8.
 
 ## Fase 8 · Pulido · `feat/polish`
 

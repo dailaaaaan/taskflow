@@ -11,6 +11,8 @@
 |
 */
 
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Broadcasting\ShouldRescue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -41,6 +43,11 @@ arch('actions are independent of the HTTP layer')
         'Illuminate\Support\Facades\Request',
         'App\Http',
     ]);
+
+arch('board events broadcast synchronously and never fail the request')
+    ->expect('App\Events')
+    ->classes()
+    ->toImplement([ShouldBroadcastNow::class, ShouldRescue::class]);
 
 arch('policies are suffixed with Policy')
     ->expect('App\Policies')

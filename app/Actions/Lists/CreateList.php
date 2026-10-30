@@ -2,6 +2,7 @@
 
 namespace App\Actions\Lists;
 
+use App\Events\ListCreated;
 use App\Models\Board;
 use App\Models\BoardList;
 use App\Support\Position;
@@ -15,9 +16,13 @@ final class CreateList
     {
         $last = $board->lists()->max('position');
 
-        return $board->lists()->create([
+        $list = $board->lists()->create([
             'title' => $title,
             'position' => Position::after(is_numeric($last) ? (int) $last : null),
         ]);
+
+        broadcast(new ListCreated($list))->toOthers();
+
+        return $list;
     }
 }

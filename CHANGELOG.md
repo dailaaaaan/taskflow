@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-30
+
+### Added
+
+- Live collaboration: new, edited, moved and deleted cards and lists appear for everyone on the board without reloading ([ADR-0009](docs/adr/0009-realtime-board-events.md)).
+- Presence: the avatars of the teammates viewing a board appear next to its title.
+- Presence channel `board.{id}`, authorized with the same policy as the board page, and eight broadcast events with a shared `BoardEvent` base.
+- Live updates are optional: without Pusher credentials the app works as before.
+- End-to-end test with Playwright: two users in two browsers, against a local Reverb server, in a new CI job.
+
+### Changed
+
+- All writes to lists and cards go through Actions, including renames, edits and deletions.
+- The board reducer also applies remote changes, and tolerates items that already exist or no longer do.
+
+### Fixed
+
+- Card details stopped short of the right edge since drag & drop: only the title needs room for the move handle.
+
+### Security
+
+- The app secret stays on the server. The browser only receives the public Pusher key, as a page prop.
+- A Pusher outage is reported without failing the request that saved the change.
+
 ## [0.6.0] - 2026-10-29
 
 ### Added
@@ -138,7 +162,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Possible null dereference when rendering a passkey's creation date in security settings.
 
-[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/dailaaaaan/taskflow/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/dailaaaaan/taskflow/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/dailaaaaan/taskflow/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/dailaaaaan/taskflow/compare/v0.3.0...v0.4.0

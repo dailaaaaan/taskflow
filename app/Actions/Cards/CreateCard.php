@@ -2,6 +2,7 @@
 
 namespace App\Actions\Cards;
 
+use App\Events\CardCreated;
 use App\Models\BoardList;
 use App\Models\Card;
 use App\Models\User;
@@ -23,6 +24,8 @@ final class CreateCard
 
         $card->creator()->associate($creator);
         $card->save();
+
+        broadcast(new CardCreated($list, $card))->toOthers();
 
         return $card;
     }

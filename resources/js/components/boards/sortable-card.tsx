@@ -47,7 +47,7 @@ export default function SortableCard({ card, listId, canEdit, onOpen }: Props) {
             <CardItem
                 card={card}
                 onOpen={onOpen}
-                className={cn(canEdit && 'pr-10')}
+                titleClassName={cn(canEdit && 'pr-7')}
             />
             {canEdit && (
                 <DragHandle

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Lists;
 
+use App\Events\ListMoved;
 use App\Models\BoardList;
 use App\Support\Position;
 use Illuminate\Support\Facades\DB;
@@ -28,5 +29,7 @@ final class MoveList
 
             $list->update(['position' => $placement['position']]);
         });
+
+        broadcast(new ListMoved($list->board_id, $list->id, $index))->toOthers();
     }
 }

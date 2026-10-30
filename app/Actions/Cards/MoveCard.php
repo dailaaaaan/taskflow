@@ -2,6 +2,7 @@
 
 namespace App\Actions\Cards;
 
+use App\Events\CardMoved;
 use App\Models\BoardList;
 use App\Models\Card;
 use App\Support\Position;
@@ -32,5 +33,7 @@ final class MoveCard
             $card->position = $placement['position'];
             $card->save();
         });
+
+        broadcast(new CardMoved($list->board_id, $card->id, $list->id, $index))->toOthers();
     }
 }

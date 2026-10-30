@@ -20,11 +20,11 @@ function formatDueDate(date: string): string {
 export default function CardItem({
     card,
     onOpen,
-    className,
+    titleClassName,
 }: {
     card: Card;
     onOpen: () => void;
-    className?: string;
+    titleClassName?: string;
 }) {
     return (
         <button
@@ -33,11 +33,10 @@ export default function CardItem({
             className={cn(
                 cardClasses,
                 'transition-colors hover:border-primary/40 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
-                className,
             )}
             data-test="card-item"
         >
-            <CardContent card={card} />
+            <CardContent card={card} titleClassName={titleClassName} />
         </button>
     );
 }
@@ -59,7 +58,13 @@ export function CardPreview({ card }: { card: Card }) {
     );
 }
 
-function CardContent({ card }: { card: Card }) {
+function CardContent({
+    card,
+    titleClassName,
+}: {
+    card: Card;
+    titleClassName?: string;
+}) {
     // `en-CA` formats as YYYY-MM-DD in local time, comparable as a string.
     const today = new Date().toLocaleDateString('en-CA');
     const overdue = card.due_date !== null && card.due_date < today;
@@ -70,7 +75,11 @@ function CardContent({ card }: { card: Card }) {
 
     return (
         <>
-            <span className="block font-medium break-words">{card.title}</span>
+            <span
+                className={cn('block font-medium break-words', titleClassName)}
+            >
+                {card.title}
+            </span>
 
             {hasDetails && (
                 <span className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">

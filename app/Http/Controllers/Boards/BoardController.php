@@ -12,6 +12,7 @@ use App\Http\Resources\TeamResource;
 use App\Models\Board;
 use App\Models\Team;
 use App\Models\User;
+use App\Support\RealtimeConfig;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -43,6 +44,7 @@ final class BoardController extends Controller
             'lists' => fn () => BoardListResource::collection($board->lists()->with('cards.assignee')->get()),
             // Possible assignees for the card modal.
             'members' => fn () => MemberResource::collection($board->team->memberships()->with('user')->adminsFirst()->get()),
+            'realtime' => RealtimeConfig::forBrowser(),
             'can' => [
                 'update' => $user->can('update', $board),
                 'delete' => $user->can('delete', $board),
