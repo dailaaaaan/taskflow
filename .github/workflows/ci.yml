@@ -66,6 +66,10 @@ jobs:
 
       - name: Frontend unit tests (Vitest)
         run: npm test
+        env:
+          # Vitest loads Vite in serve mode, which laravel-vite-plugin refuses
+          # in CI to stop HMR servers. These tests never start one.
+          LARAVEL_BYPASS_ENV_CHECK: '1'
 
       - name: Dependency audit
         run: |
