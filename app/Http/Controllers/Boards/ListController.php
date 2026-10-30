@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Boards;
 
 use App\Actions\Lists\CreateList;
+use App\Actions\Lists\DeleteList;
 use App\Actions\Lists\MoveList;
+use App\Actions\Lists\RenameList;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Boards\MoveListRequest;
 use App\Http\Requests\Boards\SaveListRequest;
@@ -25,9 +27,9 @@ final class ListController extends Controller
         return back();
     }
 
-    public function update(SaveListRequest $request, Board $board, BoardList $list): RedirectResponse
+    public function update(SaveListRequest $request, Board $board, BoardList $list, RenameList $renameList): RedirectResponse
     {
-        $list->update($request->validated());
+        $renameList->handle($list, $request->string('title')->toString());
 
         return back();
     }
@@ -42,9 +44,9 @@ final class ListController extends Controller
         return back();
     }
 
-    public function destroy(Board $board, BoardList $list): RedirectResponse
+    public function destroy(Board $board, BoardList $list, DeleteList $deleteList): RedirectResponse
     {
-        $list->delete();
+        $deleteList->handle($list);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('List deleted.')]);
 

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Boards;
 
 use App\Actions\Cards\CreateCard;
+use App\Actions\Cards\DeleteCard;
 use App\Actions\Cards\MoveCard;
+use App\Actions\Cards\UpdateCard;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Boards\MoveCardRequest;
 use App\Http\Requests\Boards\StoreCardRequest;
@@ -29,9 +31,9 @@ final class CardController extends Controller
         return back();
     }
 
-    public function update(UpdateCardRequest $request, Board $board, Card $card): RedirectResponse
+    public function update(UpdateCardRequest $request, Board $board, Card $card, UpdateCard $updateCard): RedirectResponse
     {
-        $card->update($request->validated());
+        $updateCard->handle($board, $card, $request->validated());
 
         return back();
     }
@@ -47,9 +49,9 @@ final class CardController extends Controller
         return back();
     }
 
-    public function destroy(Board $board, Card $card): RedirectResponse
+    public function destroy(Board $board, Card $card, DeleteCard $deleteCard): RedirectResponse
     {
-        $card->delete();
+        $deleteCard->handle($board, $card);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Card deleted.')]);
 
