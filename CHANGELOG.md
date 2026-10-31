@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Production image with FrankenPHP, running as a non-root user, and a Render Blueprint ([ADR-0011](docs/adr/0011-free-production-hosting.md)).
+- CI job that builds the image, starts it with the memory of the free plan and opens the demo from outside.
+- One-click public demo, with two accounts to try live updates in two windows. The workspace goes back to its original state on every start, and is rebuilt if a visitor deletes it.
+- `REGISTRATION_ENABLED` switch, because Render's free plan blocks SMTP and new accounts have to verify their email.
+- Deployment guide in `docs/DEPLOYMENT.md`.
+
+### Changed
+
+- The demo data no longer depends on Faker, which is not installed in production, and has realistic titles.
+
+### Security
+
+- Demo accounts have a random password in production, so changing the password, deleting the account, 2FA and passkeys stay out of reach. Their profile cannot be changed either.
+- The app trusts Render's proxy, so it knows that visitors are on HTTPS and signed invite links keep working.
+
 ## [0.8.0] - 2026-10-31
 
 ### Added

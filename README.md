@@ -107,6 +107,10 @@ While `GITHUB_CLIENT_ID` is empty, the "Continue with GitHub" button is hidden a
 
 Without them everything works, except that other people's changes only appear after a reload. See [ADR-0009](docs/adr/0009-realtime-board-events.md).
 
+## Deployment
+
+TaskFlow runs for free on Render, Neon and Pusher, from a [production image](Dockerfile) that CI builds and tests on every pull request. Step-by-step instructions are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md), and the reasons in [ADR-0011](docs/adr/0011-free-production-hosting.md).
+
 ## Quality and testing
 
 | Gate                          | Tool                      | Command                               |
@@ -126,20 +130,22 @@ The CI pipeline runs on every push and pull request:
 - **Quality**: style, static analysis, lint, type checking, frontend unit tests (Vitest) and a dependency audit (`composer audit`, `npm audit`)
 - **Tests**: the full Pest suite on PostgreSQL, including browser tests in headless Chromium, with PCOV coverage, a JUnit report published as a check run, and reports uploaded as artifacts
 - **Realtime E2E**: two browsers on the same board, a dropped connection, a real touch drag and held requests, against a local Reverb server
+- **Docker image**: builds the production image, starts it with the memory of the free plan and opens the demo from outside
 - **Conventional commits**: every commit message in the pull request is validated
 
 The test strategy and the test inventory are documented in [`docs/TESTING.md`](docs/TESTING.md).
 
 ## Project documentation
 
-| Document                             | Purpose                                                      |
-| ------------------------------------ | ------------------------------------------------------------ |
-| [`CLAUDE.md`](CLAUDE.md)             | Engineering conventions and AI collaboration contract        |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branching, commits, pull requests and the Definition of Done |
-| [`docs/adr/`](docs/adr/)             | Architecture decision records                                |
-| [`docs/TESTING.md`](docs/TESTING.md) | Test strategy and inventory                                  |
-| [`SECURITY.md`](SECURITY.md)         | Vulnerability reporting and security measures                |
-| [`CHANGELOG.md`](CHANGELOG.md)       | Notable changes per release                                  |
+| Document                                   | Purpose                                                      |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| [`CLAUDE.md`](CLAUDE.md)                   | Engineering conventions and AI collaboration contract        |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md)       | Branching, commits, pull requests and the Definition of Done |
+| [`docs/adr/`](docs/adr/)                   | Architecture decision records                                |
+| [`docs/TESTING.md`](docs/TESTING.md)       | Test strategy and inventory                                  |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Production deployment, step by step                          |
+| [`SECURITY.md`](SECURITY.md)               | Vulnerability reporting and security measures                |
+| [`CHANGELOG.md`](CHANGELOG.md)             | Notable changes per release                                  |
 
 ## AI-assisted development
 

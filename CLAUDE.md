@@ -22,6 +22,7 @@
 | Frontend toolchain      | Vite+ (`vp`): Vite, Oxlint, Oxfmt                                                                  | 1.4.x                   |
 | Database                | PostgreSQL 17 (Docker locally, Neon in production). Tests use the `taskflow_test` database         | —                       |
 | Realtime                | Laravel broadcasting → Pusher Channels → Laravel Echo                                              | —                       |
+| Production              | Docker image with FrankenPHP on Render ([ADR-0011](docs/adr/0011-free-production-hosting.md))      | —                       |
 | Tests                   | Pest 5 (unit, feature, architecture, browser), Vitest, Playwright                                  | —                       |
 | Static analysis / style | Larastan **level 8**, Pint (`laravel` preset)                                                      | —                       |
 
@@ -224,6 +225,7 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 | Fix frontend lint and format               | `npm run check:fix`                                |
 | Reset local database                       | `php artisan migrate:fresh --seed`                 |
 | Install Git hooks after cloning            | `npm run prepare`                                  |
+| Production image, step by step             | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)         |
 
 **Environment notes**
 
@@ -236,4 +238,6 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 - GitHub OAuth is optional. Locally `GITHUB_CLIENT_ID` is empty, so the feature is disabled. Its secrets are set by the owner only.
 - Live updates are optional too: they turn on with `BROADCAST_CONNECTION=pusher` and the `PUSHER_*` values, which only the owner sets. The E2E tests need neither, because they start a local Reverb server with throwaway keys (`playwright.config.ts`) and reseeds the `taskflow_test` database.
 - `composer` is a `.bat` file on Windows, so `^` in a version constraint is swallowed by `cmd`. Require a package without a version, or edit `composer.json`.
+- Production is a Docker image started by `docker/start.sh`. Dev packages such as Faker are not installed there, so nothing that runs on a start may use factories. Route and config caches are built on start, never in the image: both depend on runtime variables.
+- The demo accounts (`config/demo.php`) are shared with strangers. Any new setting that changes what a user can do must keep asking for the current password, or be closed to them.
 - A new or changed CI step is tried locally with the `CI` variable set before handing it over: tools such as `laravel-vite-plugin` behave differently under it.
