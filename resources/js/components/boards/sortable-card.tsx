@@ -38,7 +38,7 @@ export default function SortableCard({ card, listId, canEdit, onOpen }: Props) {
             ref={setNodeRef}
             style={{ transform: CSS.Translate.toString(transform), transition }}
             className={cn(
-                'group/card relative touch-manipulation',
+                'group/card relative touch-manipulation select-none',
                 // The original stays in place as a placeholder under the overlay.
                 isDragging && 'opacity-40',
             )}
@@ -54,7 +54,7 @@ export default function SortableCard({ card, listId, canEdit, onOpen }: Props) {
                     label={`Move card ${card.title}`}
                     handleRef={setActivatorNodeRef}
                     attributes={attributes}
-                    className="absolute top-2 right-2 opacity-0 group-hover/card:opacity-100"
+                    className="absolute top-2 right-2 opacity-0 group-hover/card:opacity-100 pointer-coarse:opacity-100"
                 />
             )}
         </div>

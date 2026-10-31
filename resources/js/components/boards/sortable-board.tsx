@@ -25,6 +25,7 @@ import {
     SortableContext,
 } from '@dnd-kit/sortable';
 import { router } from '@inertiajs/react';
+import { Columns3 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import CardController from '@/actions/App/Http/Controllers/Boards/CardController';
@@ -32,6 +33,7 @@ import ListController from '@/actions/App/Http/Controllers/Boards/ListController
 import AddListForm from '@/components/boards/add-list-form';
 import { CardPreview } from '@/components/boards/card-item';
 import ListColumn, { ListPreview } from '@/components/boards/list-column';
+import EmptyState from '@/components/empty-state';
 import {
     cardDropTarget,
     isArrowKey,
@@ -44,6 +46,7 @@ import {
 import type { DragData } from '@/lib/board-dnd';
 import { boardReducer } from '@/lib/board-reducer';
 import type { BoardAction } from '@/lib/board-reducer';
+import { cn } from '@/lib/utils';
 import type { Board, BoardList } from '@/types';
 import type { RouteDefinition } from '@/wayfinder';
 
@@ -328,7 +331,14 @@ export default function SortableBoard({
             onDragCancel={reset}
         >
             <div
-                className="flex flex-1 items-start gap-4 overflow-x-auto p-4 md:p-6"
+                className={cn(
+                    'flex flex-1 items-start gap-4 overflow-x-auto p-4 md:p-6',
+                    // Lists settle in place when swiped. Off while dragging, or it would
+                    // fight dnd-kit's scrolling near the edges.
+                    !active && 'max-md:snap-x max-md:scroll-px-4',
+                    shown.length === 0 &&
+                        'flex-col items-center justify-center',
+                )}
                 data-test="board-lists"
             >
                 <SortableContext
@@ -346,13 +356,17 @@ export default function SortableBoard({
                     ))}
                 </SortableContext>
 
-                {canEdit && <AddListForm board={board} />}
-
-                {shown.length === 0 && !canEdit && (
-                    <p className="text-sm text-muted-foreground">
-                        This board has no lists yet.
-                    </p>
+                {shown.length === 0 && (
+                    <EmptyState
+                        icon={Columns3}
+                        title="This board has no lists yet"
+                        description="Lists are the stages of your work, for example To do, Doing and Done."
+                        className="border-0 py-0"
+                    />
                 )}
+
+                {/* Same slot with or without lists, so it stays open after the first one. */}
+                {canEdit && <AddListForm board={board} />}
             </div>
 
             <DragOverlay>
