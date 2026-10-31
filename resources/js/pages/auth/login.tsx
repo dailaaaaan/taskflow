@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import GitHubLogin from '@/components/github-login';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
@@ -24,6 +24,8 @@ export default function Login({
     canResetPassword,
     canLoginWithGitHub,
 }: Props) {
+    const { canRegister } = usePage().props;
+
     return (
         <>
             <Head title="Log in" />
@@ -92,10 +94,12 @@ export default function Login({
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-muted-foreground">
-                            Don't have an account?{' '}
-                            <TextLink href={register()}>Sign up</TextLink>
-                        </div>
+                        {canRegister && (
+                            <div className="text-center text-sm text-muted-foreground">
+                                Don't have an account?{' '}
+                                <TextLink href={register()}>Sign up</TextLink>
+                            </div>
+                        )}
                     </>
                 )}
             </Form>

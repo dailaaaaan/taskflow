@@ -5,6 +5,7 @@ use App\Http\Controllers\Boards\BoardController;
 use App\Http\Controllers\Boards\CardController;
 use App\Http\Controllers\Boards\ListController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DemoLoginController;
 use App\Http\Controllers\Teams\InvitationAcceptanceController;
 use App\Http\Controllers\Teams\InvitationController;
 use App\Http\Controllers\Teams\LeaveTeamController;
@@ -14,6 +15,11 @@ use App\Models\Board;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
+
+Route::post('demo/{account}', DemoLoginController::class)
+    ->middleware(['guest', 'throttle:10,1'])
+    ->whereIn('account', ['demo', 'sam'])
+    ->name('demo.login');
 
 Route::middleware(['guest', 'throttle:10,1'])
     ->prefix('auth/github')

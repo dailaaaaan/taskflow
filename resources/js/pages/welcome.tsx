@@ -12,6 +12,7 @@ import AppLogoIcon from '@/components/app-logo-icon';
 import BoardPreview from '@/components/landing/board-preview';
 import { Button } from '@/components/ui/button';
 import { dashboard, login, register } from '@/routes';
+import { login as demoLogin } from '@/routes/demo';
 
 const repositoryUrl = 'https://github.com/dailaaaaan/taskflow';
 
@@ -54,7 +55,7 @@ const features: { icon: LucideIcon; title: string; description: string }[] = [
 ];
 
 export default function Welcome() {
-    const { auth } = usePage().props;
+    const { auth, canRegister, demoEnabled } = usePage().props;
 
     return (
         <>
@@ -85,9 +86,13 @@ export default function Welcome() {
                                 <Button variant="ghost" asChild>
                                     <Link href={login()}>Log in</Link>
                                 </Button>
-                                <Button asChild>
-                                    <Link href={register()}>Get started</Link>
-                                </Button>
+                                {canRegister && (
+                                    <Button asChild>
+                                        <Link href={register()}>
+                                            Get started
+                                        </Link>
+                                    </Button>
+                                )}
                             </>
                         )}
                     </nav>
@@ -104,21 +109,50 @@ export default function Welcome() {
                             together, and always know who else is looking.
                         </p>
                         <div className="mt-8 flex flex-wrap gap-3">
-                            <Button size="lg" asChild>
-                                {auth.user ? (
+                            {auth.user && (
+                                <Button size="lg" asChild>
                                     <Link href={dashboard()}>
                                         Go to your teams
                                     </Link>
-                                ) : (
+                                </Button>
+                            )}
+                            {!auth.user && demoEnabled && (
+                                <Button size="lg" asChild>
+                                    <Link
+                                        href={demoLogin('demo')}
+                                        as="button"
+                                        data-test="try-demo-button"
+                                    >
+                                        Try the live demo
+                                    </Link>
+                                </Button>
+                            )}
+                            {!auth.user && !demoEnabled && canRegister && (
+                                <Button size="lg" asChild>
                                     <Link href={register()}>
                                         Create your first board
                                     </Link>
-                                )}
-                            </Button>
+                                </Button>
+                            )}
                             <Button size="lg" variant="outline" asChild>
                                 <a href={repositoryUrl}>View the source</a>
                             </Button>
                         </div>
+                        {!auth.user && demoEnabled && (
+                            <p className="mt-4 text-sm text-muted-foreground">
+                                To watch changes arrive live, open a private
+                                window and{' '}
+                                <Link
+                                    href={demoLogin('sam')}
+                                    as="button"
+                                    className="cursor-pointer font-medium text-foreground underline underline-offset-4"
+                                    data-test="join-as-sam-button"
+                                >
+                                    join as Sam
+                                </Link>{' '}
+                                too.
+                            </p>
+                        )}
 
                         <div className="mt-14">
                             <BoardPreview />
