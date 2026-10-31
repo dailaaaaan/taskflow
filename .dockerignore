@@ -1,0 +1,38 @@
+# Secrets must never reach an image layer.
+.env
+.env.*
+!.env.example
+
+.git
+.github
+.husky
+.claude
+
+# Rebuilt inside the image.
+node_modules
+vendor
+public/build
+public/hot
+resources/js/actions
+resources/js/routes
+resources/js/wayfinder
+# Lists the dev packages of this machine, which the image does not have.
+bootstrap/cache/*.php
+
+# Runtime leftovers of this machine.
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/app/*
+
+tests
+e2e
+docs
+test-results
+playwright-report
+*.md
+docker-compose.yml
+playwright.config.ts
+phpunit.xml
+render.yaml

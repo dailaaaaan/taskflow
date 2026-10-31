@@ -1,0 +1,25 @@
+{
+	# Render terminates TLS in front of this server.
+	auto_https off
+	admin off
+	frankenphp
+}
+
+:{$PORT:10000} {
+	root * /app/public
+	encode zstd br gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	# File names carry a content hash, so they can be cached forever.
+	@assets path /build/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	php_server
+}
