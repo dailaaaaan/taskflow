@@ -219,7 +219,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       # Two browsers against a local Reverb server: see playwright.config.ts.
-      - name: Run two-user journey
+      - name: Run end-to-end tests
         run: npm run e2e
 
       - name: Upload failure traces
@@ -229,6 +229,53 @@ jobs:
           name: e2e-traces
           path: test-results
           retention-days: 7
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: taskflow_test
+          POSTGRES_USER: taskflow
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U taskflow -d taskflow_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build the production image
+        run: docker build --tag taskflow .
+
+      # With the memory of Render's free plan, so a leak fails here first.
+      - name: Start the image
+        run: >-
+          docker run --detach --name taskflow --network host --memory 512m
+          --env-file docker/smoke.env
+          --env APP_KEY="base64:$(openssl rand -base64 32)"
+          --env DB_URL=postgresql://taskflow:password@127.0.0.1:5432/taskflow_test
+          taskflow
+
+      - name: Smoke test
+        run: sh docker/smoke-test.sh
+
+      - name: Show the logs of the image
+        if: ${{ failure() }}
+        run: docker logs taskflow
 
   commits:
     name: Conventional commits

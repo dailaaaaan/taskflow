@@ -161,7 +161,9 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Off on the free production plan: it blocks SMTP, so nobody could
+        // verify a new account. Read when the routes load, not on each request.
+        ...env('REGISTRATION_ENABLED', true) ? [Features::registration()] : [],
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

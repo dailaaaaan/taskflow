@@ -14,8 +14,8 @@
 | 5 · Tableros, listas y tarjetas                 | `feat/boards`        | ✅ v0.5.0   |
 | 6 · Drag & drop                                 | `feat/drag-and-drop` | ✅ v0.6.0   |
 | 7 · Tiempo real                                 | `feat/realtime`      | ✅ v0.7.0   |
-| 8 · Pulido de UI y accesibilidad                | `feat/polish`        | 🔄 En curso |
-| 9 · Despliegue                                  | `chore/deploy`       | ⬜          |
+| 8 · Pulido de UI y accesibilidad                | `feat/polish`        | ✅ v0.8.0   |
+| 9 · Despliegue                                  | `chore/deploy`       | 🔄 En curso |
 | 10 · README final de portfolio                  | `docs/readme`        | ⬜          |
 
 ## Decisiones tomadas
@@ -29,7 +29,7 @@
 | Tiempo real       | Pusher, plan gratuito ([ADR-0002](adr/0002-pusher-for-realtime.md))                           |
 | Orden de tarjetas | Posiciones enteras con huecos ([ADR-0003](adr/0003-integer-gap-positions.md))                 |
 | Capas             | Actions + Policies ([ADR-0004](adr/0004-actions-and-policies.md))                             |
-| Hosting (gratis)  | Render (web) + Neon (PostgreSQL) + Pusher. Se confirma en la Fase 9                           |
+| Hosting (gratis)  | Render (web) + Neon (PostgreSQL) + Pusher ([ADR-0011](adr/0011-free-production-hosting.md))   |
 
 ## Rutina de cada fase
 
@@ -282,12 +282,29 @@ Issue: [#13](https://github.com/dailaaaaan/taskflow/issues/13) · Milestone: v0.
 
 ## Fase 9 · Despliegue · `chore/deploy`
 
-| #   | Mensaje                                            |
-| --- | -------------------------------------------------- |
-| 9.1 | `build: add production Dockerfile`                 |
-| 9.2 | `chore(deploy): add production configuration`      |
-| 9.3 | `feat(db): add demo account seeder for production` |
-| 9.4 | `docs: add live demo link to README`               |
+Issue: [#14](https://github.com/dailaaaaan/taskflow/issues/14) · Milestone: v0.9.0
+
+| #   | Mensaje                                                             | Qué incluye                                                                                        |
+| --- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| 9.1 | `feat(demo): add a one-click public demo and a registration switch` | `DemoSeeder` sin Faker, entrada con un clic, cuentas protegidas, interruptor de registro, 19 tests |
+| 9.2 | `chore(deploy): add production configuration`                       | `render.yaml`, confianza en el proxy de Render y 2 tests                                           |
+| 9.3 | `build: add production Dockerfile`                                  | Imagen con FrankenPHP sin root, arranque, smoke test y job nuevo en el CI                          |
+| 9.4 | `docs: document the production deployment`                          | ADR-0011, `docs/DEPLOYMENT.md`, README, SECURITY, CLAUDE.md, TESTING, PLAN, CHANGELOG              |
+| 9.5 | `docs: add live demo link to README`                                | Después de desplegar: enlace real, CHANGELOG `[0.9.0]` y roadmap                                   |
+
+**✅ Hecho cuando:** la demo funciona en la dirección pública, con avatares y cambios en vivo entre dos ventanas.
+
+**🎓 Qué tienes que saber explicar**
+
+- **Qué hace cada etapa del Dockerfile** y por qué los assets necesitan PHP: Wayfinder ejecuta `artisan` durante el build de Vite.
+- **Por qué `.dockerignore` excluye `.env`**: lo que entra en una capa de la imagen se queda ahí, aunque luego se borre.
+- **Por qué las cachés se crean al arrancar y no en la imagen**: dependen de variables que solo existen en ejecución. Una caché de rutas creada antes mantendría `/register` con el registro apagado.
+- **Proxy inverso y `trustProxies`**: Render recibe HTTPS y reenvía HTTP. Sin confiar en el proxy, la app crearía enlaces `http://` y fallarían las invitaciones firmadas.
+- **Conexión directa frente a pooler en Neon**: el pooler en modo transacción pierde los `SET` que Laravel envía al conectar.
+- **Por qué la demo usa contraseña aleatoria**: una contraseña pública permitiría cambiarla y dejar fuera a los demás. Sin conocerla, cambiarla, borrar la cuenta y activar 2FA quedan cerrados sin código extra.
+- **Por qué el registro está apagado en producción**: Render gratis bloquea SMTP, y saltarse la verificación permitiría capturar cuentas a través del login con GitHub.
+- **Limitaciones del plan gratuito**: arranque en frío de un minuto tras 15 minutos sin visitas, y por qué eso también restaura la demo.
+- **Smoke test**: prueba la imagen real desde fuera, como su primer visitante, y lo comprobamos también viendo que falla cuando debe.
 
 ## Fase 10 · README final · `docs/readme`
 

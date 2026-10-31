@@ -14,5 +14,6 @@ An ADR captures one significant technical decision: the context, the options con
 | [0008](0008-drag-and-drop-with-optimistic-inertia-visits.md) | Drag & drop with dnd-kit and optimistic Inertia visits                    | Accepted |
 | [0009](0009-realtime-board-events.md)                        | Keep boards in sync with reducer actions over a presence channel          | Accepted |
 | [0010](0010-error-pages-and-failure-toasts.md)               | Error pages for visits, toasts for writes                                 | Accepted |
+| [0011](0011-free-production-hosting.md)                      | Free production hosting and a public demo                                 | Accepted |
 
 New ADRs start from [`template.md`](template.md).
