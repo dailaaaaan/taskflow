@@ -37,6 +37,7 @@ type Props = {
     members: Member[];
     canEdit: boolean;
     onClose: () => void;
+    onCloseAutoFocus: (event: Event) => void;
 };
 
 export default function CardDialog({
@@ -46,6 +47,7 @@ export default function CardDialog({
     members,
     canEdit,
     onClose,
+    onCloseAutoFocus,
 }: Props) {
     return (
         <Dialog
@@ -56,7 +58,10 @@ export default function CardDialog({
                 }
             }}
         >
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent
+                className="sm:max-w-lg"
+                onCloseAutoFocus={onCloseAutoFocus}
+            >
                 {card !== null && (
                     // The key resets the form's defaults when another card opens.
                     <CardDetailsForm
@@ -81,7 +86,7 @@ function CardDetailsForm({
     members,
     canEdit,
     onClose,
-}: Omit<Props, 'card'> & { card: Card }) {
+}: Omit<Props, 'card' | 'onCloseAutoFocus'> & { card: Card }) {
     const [assignee, setAssignee] = useState(
         card.assignee ? String(card.assignee.id) : UNASSIGNED,
     );

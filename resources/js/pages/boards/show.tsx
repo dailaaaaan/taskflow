@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { Pencil, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import BoardController from '@/actions/App/Http/Controllers/Boards/BoardController';
 import { boardColorClasses } from '@/components/boards/board-colors';
 import BoardFormDialog from '@/components/boards/board-form-dialog';
@@ -42,11 +42,27 @@ export default function BoardShow({
     const viewers = useBoardChannel(board.id, realtime);
     // Only the id is kept, so the modal always shows the latest server data.
     const [openCardId, setOpenCardId] = useState<number | null>(null);
+    const lastOpenedCardId = useRef<number | null>(null);
     const openList = lists.find((list) =>
         list.cards.some((card) => card.id === openCardId),
     );
     const openCard =
         openList?.cards.find((card) => card.id === openCardId) ?? null;
+
+    function openCardDetails(cardId: number): void {
+        lastOpenedCardId.current = cardId;
+        setOpenCardId(cardId);
+    }
+
+    // The modal has no DialogTrigger, so Radix has nowhere to return the focus.
+    function focusLastOpenedCard(event: Event): void {
+        event.preventDefault();
+        document
+            .querySelector<HTMLElement>(
+                `[data-card-id="${lastOpenedCardId.current}"]`,
+            )
+            ?.focus();
+    }
 
     return (
         <>
@@ -119,7 +135,7 @@ export default function BoardShow({
                     board={board}
                     lists={lists}
                     canEdit={can.collaborate}
-                    onOpenCard={setOpenCardId}
+                    onOpenCard={openCardDetails}
                 />
             </div>
 
@@ -130,6 +146,7 @@ export default function BoardShow({
                 members={members}
                 canEdit={can.collaborate}
                 onClose={() => setOpenCardId(null)}
+                onCloseAutoFocus={focusLastOpenedCard}
             />
         </>
     );

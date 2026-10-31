@@ -1,10 +1,10 @@
 import { Form } from '@inertiajs/react';
 import { Plus, X } from 'lucide-react';
-import { useState } from 'react';
 import ListController from '@/actions/App/Http/Controllers/Boards/ListController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useInlineForm } from '@/hooks/use-inline-form';
 import type { Board } from '@/types';
 
 /**
@@ -12,14 +12,15 @@ import type { Board } from '@/types';
  * several can be added in a row; Escape closes it.
  */
 export default function AddListForm({ board }: { board: Board }) {
-    const [adding, setAdding] = useState(false);
+    const form = useInlineForm();
 
-    if (!adding) {
+    if (!form.isOpen) {
         return (
             <Button
+                ref={form.openButton}
                 variant="ghost"
                 className="w-72 shrink-0 justify-start bg-muted/50"
-                onClick={() => setAdding(true)}
+                onClick={form.open}
                 data-test="add-list-button"
             >
                 <Plus aria-hidden />
@@ -47,7 +48,7 @@ export default function AddListForm({ board }: { board: Board }) {
                         data-test="new-list-title"
                         onKeyDown={(event) => {
                             if (event.key === 'Escape') {
-                                setAdding(false);
+                                form.close();
                             }
                         }}
                     />
@@ -67,7 +68,7 @@ export default function AddListForm({ board }: { board: Board }) {
                             size="icon"
                             className="size-8"
                             aria-label="Stop adding lists"
-                            onClick={() => setAdding(false)}
+                            onClick={() => form.close()}
                         >
                             <X />
                         </Button>
