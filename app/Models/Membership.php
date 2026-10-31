@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Support\Once;
 
 /**
  * A user's membership in a team, carrying their role.
@@ -26,6 +27,18 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 #[Fillable(['team_id', 'user_id', 'role'])]
 class Membership extends Pivot
 {
+    /**
+     * Team::roleOf() remembers roles during the request, and a permission
+     * must never outlive the change that revoked it.
+     */
+    protected static function booted(): void
+    {
+        $forgetRoles = fn () => Once::flush();
+
+        static::saved($forgetRoles);
+        static::deleted($forgetRoles);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
