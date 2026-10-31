@@ -1,11 +1,16 @@
 import { expect, test } from '@playwright/test';
-import type { Browser, Page } from '@playwright/test';
+import type { Browser, Page, WebSocketRoute } from '@playwright/test';
 
 /** Signs in with a seeded account, in its own browser context, and opens the board. */
-async function openBoardAs(browser: Browser, email: string): Promise<Page> {
+async function openBoardAs(
+    browser: Browser,
+    email: string,
+    prepare?: (page: Page) => Promise<void>,
+): Promise<Page> {
     const context = await browser.newContext();
     const page = await context.newPage();
 
+    await prepare?.(page);
     await page.goto('/login');
     await page.locator('[name=email]').fill(email);
     await page.locator('[name=password]').fill('password');
@@ -119,5 +124,53 @@ test('two members work on the same board live', async ({ browser }) => {
         await sam.close();
 
         await expect(demo.getByTestId('board-viewers')).toHaveCount(0);
+    });
+});
+
+test('a member who lost the connection catches up when it returns', async ({
+    browser,
+}) => {
+    test.setTimeout(60_000);
+
+    let online = true;
+    let socket: WebSocketRoute | undefined;
+
+    const demo = await openBoardAs(browser, 'demo@taskflow.test');
+    const sam = await openBoardAs(browser, 'sam@taskflow.test', (page) =>
+        page.routeWebSocket(/\/app\//, (route) => {
+            if (!online) {
+                return route.close();
+            }
+
+            socket = route;
+            route.connectToServer();
+        }),
+    );
+
+    await expect(demo.getByTestId('board-viewers')).toBeVisible();
+
+    await test.step('the connection drops and a change goes missing', async () => {
+        online = false;
+        await socket?.close();
+        await expect(demo.getByTestId('board-viewers')).toHaveCount(0);
+
+        const todo = list(demo, 'To do');
+
+        await todo.getByTestId('add-card-button').click();
+        await todo.getByTestId('new-card-title').fill('Added meanwhile');
+        await todo.getByTestId('submit-card-button').click();
+
+        await expect(todo.getByText('Added meanwhile')).toBeVisible();
+        await expect(sam.getByText('Added meanwhile')).toHaveCount(0);
+    });
+
+    await test.step('the board catches up when the connection returns', async () => {
+        online = true;
+
+        // pusher-js retries with a growing delay.
+        await expect(sam.getByText('Added meanwhile')).toBeVisible({
+            timeout: 30_000,
+        });
+        await expect(demo.getByTestId('board-viewers')).toBeVisible();
     });
 });

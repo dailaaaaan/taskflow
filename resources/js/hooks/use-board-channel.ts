@@ -22,9 +22,13 @@ function connect(config: RealtimeConfig): Echo<'pusher'> {
     });
 }
 
+function reloadLists(): void {
+    router.reload({ only: ['lists'], showProgress: false });
+}
+
 function applyRemoteEvent(event: BoardEvent): void {
     if (event.type === 'board/stale') {
-        router.reload({ only: ['lists'] });
+        reloadLists();
 
         return;
     }
@@ -68,8 +72,20 @@ export function useBoardChannel(
                 : request;
         });
 
+        let wasConnected = false;
+
         echo.join(channel)
-            .here((users: Viewer[]) => setViewers(users))
+            .here((users: Viewer[]) => {
+                setViewers(users);
+
+                // Runs again after a reconnection. Nothing replays what was
+                // missed while offline, so the lists come from the server.
+                if (wasConnected) {
+                    reloadLists();
+                }
+
+                wasConnected = true;
+            })
             .joining((user: Viewer) =>
                 setViewers((current) => [
                     ...current.filter(({ id }) => id !== user.id),
