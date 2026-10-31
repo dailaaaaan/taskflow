@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { KanbanSquare, Users } from 'lucide-react';
+import EmptyState from '@/components/empty-state';
 import Heading from '@/components/heading';
 import CreateTeamDialog from '@/components/teams/create-team-dialog';
 import RoleBadge from '@/components/teams/role-badge';
@@ -24,19 +25,13 @@ export default function Dashboard({ teams }: { teams: Team[] }) {
                 </div>
 
                 {teams.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed px-6 py-16 text-center">
-                        <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-                            <Users className="size-6 text-muted-foreground" />
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="font-medium">No teams yet</h3>
-                            <p className="max-w-sm text-sm text-muted-foreground">
-                                Create a team to start organising work on
-                                boards, or ask a teammate for an invite link.
-                            </p>
-                        </div>
+                    <EmptyState
+                        icon={Users}
+                        title="No teams yet"
+                        description="Create a team to start organising work on boards, or ask a teammate for an invite link."
+                    >
                         <CreateTeamDialog />
-                    </div>
+                    </EmptyState>
                 ) : (
                     <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                         {teams.map((team) => (

@@ -69,6 +69,11 @@ class Team extends Model
      */
     public function roleOf(User $user): ?TeamRole
     {
-        return $this->memberships()->firstWhere('user_id', $user->id)?->role;
+        // Policies ask several times per request, and only the first one should
+        // query. once() remembers per argument, and for objects it uses an id
+        // that PHP reuses after freeing them: too fragile for a permission.
+        $userId = $user->id;
+
+        return once(fn () => $this->memberships()->firstWhere('user_id', $userId)?->role);
     }
 }

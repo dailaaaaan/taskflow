@@ -1,10 +1,10 @@
 import { Form } from '@inertiajs/react';
 import { Plus, X } from 'lucide-react';
-import { useState } from 'react';
 import CardController from '@/actions/App/Http/Controllers/Boards/CardController';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useInlineForm } from '@/hooks/use-inline-form';
 import type { Board, BoardList } from '@/types';
 
 /**
@@ -18,15 +18,16 @@ export default function AddCardForm({
     board: Board;
     list: BoardList;
 }) {
-    const [adding, setAdding] = useState(false);
+    const form = useInlineForm();
 
-    if (!adding) {
+    if (!form.isOpen) {
         return (
             <Button
+                ref={form.openButton}
                 variant="ghost"
                 size="sm"
                 className="justify-start text-muted-foreground"
-                onClick={() => setAdding(true)}
+                onClick={form.open}
                 data-test="add-card-button"
             >
                 <Plus aria-hidden />
@@ -60,7 +61,7 @@ export default function AddCardForm({
                             }
 
                             if (event.key === 'Escape') {
-                                setAdding(false);
+                                form.close();
                             }
                         }}
                     />
@@ -80,7 +81,7 @@ export default function AddCardForm({
                             size="icon"
                             className="size-8"
                             aria-label="Stop adding cards"
-                            onClick={() => setAdding(false)}
+                            onClick={() => form.close()}
                         >
                             <X />
                         </Button>

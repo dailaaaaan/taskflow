@@ -17,18 +17,6 @@ use App\Models\Card;
 use Pest\Browser\Api\AwaitableWebpage;
 
 /**
- * JavaScript that resolves once the condition is true in the page. Keys are
- * pressed much faster than React renders, so each step waits for its result.
- */
-function waitUntil(string $condition): string
-{
-    return "() => new Promise((resolve) => {
-        const check = () => ({$condition}) ? resolve(true) : setTimeout(check, 25);
-        check();
-    })";
-}
-
-/**
  * Presses each key on the drag handle, then waits for the announcement that
  * key should produce in dnd-kit's live region. Announcements replace each
  * other quickly, so every one of them is recorded in `window.announcements`.

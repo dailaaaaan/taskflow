@@ -3,6 +3,7 @@ import { KanbanSquare, Plus, Settings } from 'lucide-react';
 import BoardController from '@/actions/App/Http/Controllers/Boards/BoardController';
 import { boardColorClasses } from '@/components/boards/board-colors';
 import BoardFormDialog from '@/components/boards/board-form-dialog';
+import EmptyState from '@/components/empty-state';
 import MemberAvatar from '@/components/teams/member-avatar';
 import RoleBadge from '@/components/teams/role-badge';
 import { Button } from '@/components/ui/button';
@@ -79,21 +80,15 @@ export default function TeamShow({ team, members, boards, can }: Props) {
                     </div>
 
                     {boards.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed px-6 py-16 text-center">
-                            <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-                                <KanbanSquare className="size-6 text-muted-foreground" />
-                            </div>
-                            <div className="space-y-1">
-                                <h3 className="font-medium">No boards yet</h3>
-                                <p className="max-w-sm text-sm text-muted-foreground">
-                                    Boards hold the lists and cards your team
-                                    works on.
-                                </p>
-                            </div>
+                        <EmptyState
+                            icon={KanbanSquare}
+                            title="No boards yet"
+                            description="Boards hold the lists and cards your team works on."
+                        >
                             {can.createBoard && (
                                 <CreateBoardDialog team={team} />
                             )}
-                        </div>
+                        </EmptyState>
                     ) : (
                         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                             {boards.map((board) => (

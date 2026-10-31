@@ -38,14 +38,14 @@ final class BoardController extends Controller
         // Closures are only evaluated when the prop is requested, so the partial
         // reload after a drag & drop move (`only: ['lists']`) skips the rest.
         return Inertia::render('boards/show', [
-            'team' => TeamResource::make($board->team),
-            'board' => BoardResource::make($board),
+            'team' => fn () => TeamResource::make($board->team),
+            'board' => fn () => BoardResource::make($board),
             // One query per level instead of one per list and per card.
             'lists' => fn () => BoardListResource::collection($board->lists()->with('cards.assignee')->get()),
             // Possible assignees for the card modal.
             'members' => fn () => MemberResource::collection($board->team->memberships()->with('user')->adminsFirst()->get()),
-            'realtime' => RealtimeConfig::forBrowser(),
-            'can' => [
+            'realtime' => fn () => RealtimeConfig::forBrowser(),
+            'can' => fn () => [
                 'update' => $user->can('update', $board),
                 'delete' => $user->can('delete', $board),
                 'collaborate' => $user->can('collaborate', $board),

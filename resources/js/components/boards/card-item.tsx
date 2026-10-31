@@ -34,6 +34,7 @@ export default function CardItem({
                 cardClasses,
                 'transition-colors hover:border-primary/40 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
             )}
+            data-card-id={card.id}
             data-test="card-item"
         >
             <CardContent card={card} titleClassName={titleClassName} />

@@ -49,6 +49,18 @@ expect()->extend('toBeOne', function () {
 */
 
 /**
+ * JavaScript that resolves once the condition is true in the page. Keys are
+ * pressed much faster than React renders, so each step waits for its result.
+ */
+function waitUntil(string $condition): string
+{
+    return "() => new Promise((resolve) => {
+        const check = () => ({$condition}) ? resolve(true) : setTimeout(check, 25);
+        check();
+    })";
+}
+
+/**
  * A board whose team has one admin and one member.
  *
  * @return array{Board, User, User}

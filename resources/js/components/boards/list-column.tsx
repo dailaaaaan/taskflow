@@ -10,7 +10,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Form, router } from '@inertiajs/react';
 import { Pencil, Trash2, X } from 'lucide-react';
-import { useState } from 'react';
 import type { Ref } from 'react';
 import ListController from '@/actions/App/Http/Controllers/Boards/ListController';
 import AddCardForm from '@/components/boards/add-card-form';
@@ -21,6 +20,7 @@ import ConfirmDialog from '@/components/confirm-dialog';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useInlineForm } from '@/hooks/use-inline-form';
 import { cardDndId, listDndId } from '@/lib/board-dnd';
 import type { DragData } from '@/lib/board-dnd';
 import { cn, pluralize } from '@/lib/utils';
@@ -70,7 +70,7 @@ export default function ListColumn({
             style={{ transform: CSS.Translate.toString(transform), transition }}
             aria-label={list.title}
             className={cn(
-                'flex w-72 shrink-0 flex-col gap-2 rounded-xl bg-muted/60 p-2',
+                'flex w-72 shrink-0 snap-start flex-col gap-2 rounded-xl bg-muted/60 p-2',
                 isDragging && 'opacity-40',
             )}
             data-test="list-column"
@@ -138,9 +138,9 @@ function ListHeader({
     canEdit: boolean;
     drag: ListDrag | null;
 }) {
-    const [renaming, setRenaming] = useState(false);
+    const renameForm = useInlineForm();
 
-    if (renaming) {
+    if (renameForm.isOpen) {
         return (
             <Form
                 {...ListController.update.form({
@@ -148,7 +148,7 @@ function ListHeader({
                     list: list.id,
                 })}
                 options={{ preserveScroll: true }}
-                onSuccess={() => setRenaming(false)}
+                onSuccess={renameForm.close}
                 className="space-y-1"
             >
                 {({ processing, errors }) => (
@@ -167,7 +167,7 @@ function ListHeader({
                                 }
                                 onKeyDown={(event) => {
                                     if (event.key === 'Escape') {
-                                        setRenaming(false);
+                                        renameForm.close();
                                     }
                                 }}
                             />
@@ -184,7 +184,7 @@ function ListHeader({
                                 size="icon"
                                 className="size-8 shrink-0"
                                 aria-label="Cancel renaming"
-                                onClick={() => setRenaming(false)}
+                                onClick={renameForm.close}
                             >
                                 <X />
                             </Button>
@@ -210,7 +210,7 @@ function ListHeader({
             <h2
                 className={cn(
                     'min-w-0 flex-1 truncate px-1 text-sm font-semibold',
-                    drag && 'cursor-grab touch-manipulation',
+                    drag && 'cursor-grab touch-manipulation select-none',
                 )}
                 {...drag?.listeners}
             >
@@ -223,11 +223,12 @@ function ListHeader({
             {canEdit && (
                 <>
                     <Button
+                        ref={renameForm.openButton}
                         variant="ghost"
                         size="icon"
                         className="size-7"
                         aria-label={`Rename list ${list.title}`}
-                        onClick={() => setRenaming(true)}
+                        onClick={renameForm.open}
                     >
                         <Pencil />
                     </Button>
