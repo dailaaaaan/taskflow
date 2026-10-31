@@ -123,6 +123,7 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 - **Controllers** are thin: no business logic and no `DB` facade (enforced by architecture tests). Inject the authenticated user with `#[CurrentUser] User $user`.
 - **Authorization is declared on the route** with `->can('ability', 'routeParam')`. The middleware runs before the Form Request validates, so unauthorized users get `403`, never validation errors. Use `Gate::authorize()` only when the subject is not a route parameter. Nested resources use `Route::scopeBindings()`, so a child of another team is a `404`.
 - **Expected domain failures** (for example `TeamMustKeepAnAdmin`) are exceptions implementing `ShouldntReport` with a `render()` method that flashes a toast. Controllers contain no `try/catch` for business rules.
+- **Unexpected failures**: `GET` visits render `errors/show` through `Inertia::handleExceptionsUsing()` in `bootstrap/app.php`, with no shared data so it works with the database down. Writes keep the plain response and `resources/js/lib/visit-errors.ts` turns it into a toast ([ADR-0010](docs/adr/0010-error-pages-and-failure-toasts.md)).
 - **Validation** lives in one `FormRequest` per write endpoint. Use `validated()`, never `all()`. When a rule needs a bound model, inject it into `rules()` with `#[RouteParameter('board')]`.
 - **Authorization** lives in one Policy per aggregate (`TeamPolicy`, `BoardPolicy`). It derives from team membership plus the `TeamRole` enum. Lists and cards belong to the board aggregate: their routes are nested under `boards/{board}`, scoped, and authorized by `BoardPolicy` ([ADR-0007](docs/adr/0007-authorize-lists-and-cards-through-the-board.md)). The UI hides controls but the server always enforces.
 - **Business logic** lives in `app/Actions/<Domain>/<Verb><Noun>.php`: `final` classes with a single public `handle()` method and no HTTP dependencies (enforced by architecture tests). Multi-row writes are wrapped in `DB::transaction()`.
@@ -139,9 +140,9 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 - URLs come from Wayfinder-generated functions. Never hardcode paths.
 - Board state is a **pure reducer** (`resources/js/lib/board-reducer.ts`). The same reducer applies optimistic updates and remote events, and it is unit-tested with Vitest.
 - Board moves are **optimistic Inertia visits**: `router.optimistic()` applies the reducer to the `lists` prop, the endpoint redirects back, and the client reloads `only: ['lists']`. Inertia rolls back on failure. Drag & drop uses dnd-kit ([ADR-0008](docs/adr/0008-drag-and-drop-with-optimistic-inertia-visits.md)).
-- Remote events reach the `lists` prop through `router.replaceProp()` and the same reducer (`resources/js/hooks/use-board-channel.ts`). Connection settings arrive as a page prop, never as `VITE_*` variables.
+- Remote events reach the `lists` prop through `router.replaceProp()` and the same reducer (`resources/js/hooks/use-board-channel.ts`). Connection settings arrive as a page prop, never as `VITE_*` variables. After a dropped connection the lists are reloaded, because nothing replays what was missed.
 - No `any`. Realtime payloads are discriminated unions.
-- Accessibility: keyboard-operable drag & drop, labelled controls, visible focus.
+- Accessibility: keyboard-operable drag & drop, labelled controls, visible focus, and focus that returns to where it was when something closes (`useInlineForm`). axe audits every page in both colour schemes (`tests/Browser/AccessibilityTest.php`).
 
 ---
 
@@ -173,7 +174,7 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 | Architecture  | `tests/Arch`                | Layering rules from section 5                                                                    |
 | Browser       | `tests/Browser`             | Critical user journeys (Pest browser testing)                                                    |
 | Frontend unit | `resources/js/**/*.test.ts` | Vitest: reducer and pure helpers                                                                 |
-| Realtime E2E  | `e2e/`                      | Playwright with two browser contexts                                                             |
+| E2E           | `e2e/`                      | Playwright, for what Pest's browser cannot drive: two users, touch, held or failed requests      |
 
 - Every behaviour change ships with its tests **in the same commit**.
 - The permission matrix (role × ability) is tested with Pest datasets.
@@ -216,7 +217,7 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 | Architecture tests only                    | `vendor/bin/pest --testsuite=Arch`                 |
 | Browser tests only (needs `npm run build`) | `vendor/bin/pest --testsuite=Browser`              |
 | Frontend unit tests (Vitest)               | `npm test`                                         |
-| Realtime E2E (needs `npm run build`)       | `npm run e2e`                                      |
+| E2E tests (needs `npm run build`)          | `npm run e2e`                                      |
 | Install the Playwright browser             | `npx playwright install chromium`                  |
 | Fix PHP style                              | `composer lint`                                    |
 | Static analysis                            | `composer types:check`                             |
@@ -233,6 +234,6 @@ Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► El
 - There is no local coverage driver. Coverage is measured in CI.
 - Browser tests use the **built** assets (`public/build`). Run `npm run build` first, and make sure no stale `public/hot` file exists, or pages will try to load the Vite dev server.
 - GitHub OAuth is optional. Locally `GITHUB_CLIENT_ID` is empty, so the feature is disabled. Its secrets are set by the owner only.
-- Live updates are optional too: they turn on with `BROADCAST_CONNECTION=pusher` and the `PUSHER_*` values, which only the owner sets. The E2E test needs neither, because it starts a local Reverb server with throwaway keys (`playwright.config.ts`) and reseeds the `taskflow_test` database.
+- Live updates are optional too: they turn on with `BROADCAST_CONNECTION=pusher` and the `PUSHER_*` values, which only the owner sets. The E2E tests need neither, because they start a local Reverb server with throwaway keys (`playwright.config.ts`) and reseeds the `taskflow_test` database.
 - `composer` is a `.bat` file on Windows, so `^` in a version constraint is swallowed by `cmd`. Require a package without a version, or edit `composer.json`.
 - A new or changed CI step is tried locally with the `CI` variable set before handing it over: tools such as `laravel-vite-plugin` behave differently under it.

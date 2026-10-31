@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-31
+
+### Added
+
+- Landing page with a preview of a live board, replacing the starter kit welcome page.
+- Error pages for `403`, `404`, `429`, `500` and `503`. Failed writes stay on their page and end in a toast, so a clash with another user does not take over the screen ([ADR-0010](docs/adr/0010-error-pages-and-failure-toasts.md)).
+- Skeleton while a navigation takes longer than 250 ms, and a shared empty state, also for boards without lists.
+- Skip link, and screen reader announcements of each new page.
+- Lists settle in place when swiped on phones, and the move handle of a card is always visible on touch screens.
+- axe audit of every page in light and dark mode, tests for phone screens and keyboard use, and end-to-end tests of a real touch drag, a dropped connection and slow or failed visits.
+
+### Changed
+
+- The board reloads its lists after a dropped connection, so changes made while offline are no longer missed until the next page load.
+- Animations and transitions respect `prefers-reduced-motion`.
+
+### Fixed
+
+- Keyboard focus was lost after closing the card modal or the forms inside a list, sending people back to the top of the page.
+- Auth pages and the app sidebar were outside any landmark for screen readers.
+
+### Performance
+
+- Pages asked the database for the same role up to 7 times per request. Each role is now read once, and forgotten as soon as a membership changes.
+- The partial reload after a drag & drop move went from 9 queries to 6.
+
 ## [0.7.0] - 2026-10-30
 
 ### Added
@@ -162,7 +188,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Possible null dereference when rendering a passkey's creation date in security settings.
 
-[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/dailaaaaan/taskflow/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/dailaaaaan/taskflow/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/dailaaaaan/taskflow/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/dailaaaaan/taskflow/compare/v0.4.0...v0.5.0

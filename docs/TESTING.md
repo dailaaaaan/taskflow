@@ -10,7 +10,7 @@
 ## Test pyramid
 
 ```
-            ▲  Realtime E2E (Playwright, two browsers)      few, slow
+            ▲  E2E (Playwright, two browsers, touch)        few, slow
            ▲▲  Browser journeys (Pest browser)
           ▲▲▲  Feature tests (HTTP + DB + Policies)         most of the value
          ▲▲▲▲  Unit tests (PHP pure classes, TS reducer)    many, fast
@@ -22,9 +22,9 @@
 | Unit          | `tests/Unit`                | Pest                    | Pure PHP classes (`Position`, enums)                                              |
 | Feature       | `tests/Feature`             | Pest, `RefreshDatabase` | Endpoints, validation, Policies (`403` matrix), Actions, broadcast events (faked) |
 | Architecture  | `tests/Arch`                | Pest `arch()`           | Layering rules and security preset                                                |
-| Browser       | `tests/Browser`             | Pest browser testing    | Critical journeys: auth, invitations, board CRUD, drag & drop                     |
+| Browser       | `tests/Browser`             | Pest browser testing    | Critical journeys, keyboard use, phone screens and an axe audit of every page     |
 | Frontend unit | `resources/js/**/*.test.ts` | Vitest                  | Board reducer and pure helpers                                                    |
-| Realtime E2E  | `e2e/`                      | Playwright              | Two users see each other's changes live                                           |
+| E2E           | `e2e/`                      | Playwright              | Live updates between two users, reconnection, touch drag, slow and failed visits  |
 
 ## Running tests
 
@@ -34,7 +34,7 @@
 | `php artisan test --filter=BoardPolicy` | Tests matching a name              |
 | `vendor/bin/pest --testsuite=Arch`      | Architecture tests only            |
 | `npm test`                              | Frontend unit tests (Vitest)       |
-| `npm run e2e`                           | Realtime E2E (needs a build)       |
+| `npm run e2e`                           | E2E tests (needs a build)          |
 | `composer ci:check`                     | Full quality gate, including tests |
 
 ## Reports and records
@@ -73,16 +73,23 @@ Updated at the end of each phase.
 | 6 · Drag & drop | Feature (`MoveCardTest`, `MoveListTest`)                     | 22    | MoveCard and MoveList within and across lists, one write while a gap exists, renumbering, other boards untouched, target list of another board rejected, **403 before validation**, 404 across boards, partial reload of `lists` only |
 | 6 · Drag & drop | Browser (`DragAndDropTest`)                                  | 5     | Keyboard moves across lists, within a list and of lists, with their screen reader announcements; rollback and error toast after a rejected move; axe                                                                                  |
 | 6 · Drag & drop | Frontend unit (Vitest)                                       | 27    | Board reducer (moves, clamping, identity of unchanged lists, no mutation) and drag & drop helpers (drop targets, keyboard targets)                                                                                                    |
+| 7 · Realtime    | Feature (`BoardChannelTest`)                                 | 5     | Presence channel with the real Pusher driver, signed locally: admin and member join, non-members, members of another team and guests get 403                                                                                          |
+| 7 · Realtime    | Feature (`BoardBroadcastTest`, `BroadcastFailureTest`)       | 12    | Each of the eight events: channel, payload and `toOthers()`; payload limit with escaped characters; rejected changes send nothing; a failing broadcaster keeps the change                                                             |
+| 7 · Realtime    | Feature (`RealtimeConfigTest`)                               | 4     | Live updates off without Pusher or a key, public settings only, Pusher-compatible host                                                                                                                                                |
+| 7 · Realtime    | Architecture                                                 | +1    | Every event broadcasts synchronously and is rescued                                                                                                                                                                                   |
+| 7 · Realtime    | Frontend unit (Vitest)                                       | +11   | Remote actions: created, updated, deleted and renamed, including items that already exist or no longer do                                                                                                                             |
+| 7 · Realtime    | E2E (`e2e/realtime.spec.ts`)                                 | 1     | Two users in two browsers: presence, create, move, edit, list create and rename, delete, `X-Socket-ID`, leaving the board                                                                                                             |
+| 8 · Polish      | Feature (`ErrorPagesTest`)                                   | 11    | Error page per status, unknown URLs, signed-in link, no shared data, debug screen kept, failed writes and JSON clients untouched                                                                                                      |
+| 8 · Polish      | Feature (`BoardQueriesTest`)                                 | 7     | Same queries for any board size, partial reload, one role lookup per request, two users never mixed up, role forgotten after a membership change                                                                                      |
+| 8 · Polish      | Browser (`AccessibilityTest`)                                | 24    | axe at the strictest level on 12 pages, each in light and dark mode                                                                                                                                                                   |
+| 8 · Polish      | Browser (`KeyboardNavigationTest`)                           | 6     | Skip link, focus returned after the card modal and three inline forms, page announcements                                                                                                                                             |
+| 8 · Polish      | Browser (`ResponsiveTest`)                                   | 7     | Six pages fit a phone, and only the board scrolls sideways                                                                                                                                                                            |
+| 8 · Polish      | Browser (`ErrorHandlingTest`)                                | 2     | Error page and its way back, toast after a clash with another user                                                                                                                                                                    |
+| 8 · Polish      | Frontend unit (Vitest)                                       | +3    | Messages of failed requests                                                                                                                                                                                                           |
+| 8 · Polish      | E2E (`e2e/navigation`, `touch`, `realtime`)                  | +4    | Skeleton on a held request, failed visit keeps the page, long press and drag with real touch events, catching up after a dropped connection                                                                                           |
 
-| 7 · Realtime | Feature (`BoardChannelTest`) | 5 | Presence channel with the real Pusher driver, signed locally: admin and member join, non-members, members of another team and guests get 403 |
-| 7 · Realtime | Feature (`BoardBroadcastTest`, `BroadcastFailureTest`) | 12 | Each of the eight events: channel, payload and `toOthers()`; payload limit with escaped characters; rejected changes send nothing; a failing broadcaster keeps the change |
-| 7 · Realtime | Feature (`RealtimeConfigTest`) | 4 | Live updates off without Pusher or a key, public settings only, Pusher-compatible host |
-| 7 · Realtime | Architecture | +1 | Every event broadcasts synchronously and is rescued |
-| 7 · Realtime | Frontend unit (Vitest) | +11 | Remote actions: created, updated, deleted and renamed, including items that already exist or no longer do |
-| 7 · Realtime | E2E (`e2e/realtime.spec.ts`) | 1 | Two users in two browsers: presence, create, move, edit, list create and rename, delete, `X-Socket-ID`, leaving the board |
+**Total after phase 8: 366 tests** (320 Pest + 41 Vitest + 5 E2E).
 
-**Total after phase 7: 302 tests** (263 Pest + 38 Vitest + 1 E2E).
-
-The E2E test runs a local [Reverb](https://reverb.laravel.com) server with throwaway keys, so the real Pusher driver and `pusher-js` are exercised with no external network and no secrets. It reseeds the `taskflow_test` database, never the development one.
+The E2E tests run a local [Reverb](https://reverb.laravel.com) server with throwaway keys, so the real Pusher driver and `pusher-js` are exercised with no external network and no secrets. They reseed the `taskflow_test` database, never the development one. Slow and failed requests are held or aborted by the test itself, never with sleeps.
 
 All database tests run against **PostgreSQL 17** (`taskflow_test`), the same engine as production, so constraints and cascades are verified for real.

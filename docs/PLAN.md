@@ -13,8 +13,8 @@
 | 4 · Equipos y roles                             | `feat/teams`         | ✅ v0.4.0   |
 | 5 · Tableros, listas y tarjetas                 | `feat/boards`        | ✅ v0.5.0   |
 | 6 · Drag & drop                                 | `feat/drag-and-drop` | ✅ v0.6.0   |
-| 7 · Tiempo real                                 | `feat/realtime`      | 🔄 En curso |
-| 8 · Pulido de UI y accesibilidad                | `feat/polish`        | ⬜          |
+| 7 · Tiempo real                                 | `feat/realtime`      | ✅ v0.7.0   |
+| 8 · Pulido de UI y accesibilidad                | `feat/polish`        | 🔄 En curso |
 | 9 · Despliegue                                  | `chore/deploy`       | ⬜          |
 | 10 · README final de portfolio                  | `docs/readme`        | ⬜          |
 
@@ -251,13 +251,34 @@ Issue: [#12](https://github.com/dailaaaaan/taskflow/issues/12) · Milestone: v0.
 
 ## Fase 8 · Pulido · `feat/polish`
 
-| #   | Mensaje                                                         |
-| --- | --------------------------------------------------------------- |
-| 8.1 | `feat(ui): add loading skeletons, empty states and error pages` |
-| 8.2 | `feat(ui): make board responsive on mobile`                     |
-| 8.3 | `fix(a11y): improve keyboard navigation and labels`             |
-| 8.4 | `perf: eager load board data and add indexes`                   |
-| 8.5 | `feat(ui): add landing page`                                    |
+Issue: [#13](https://github.com/dailaaaaan/taskflow/issues/13) · Milestone: v0.8.0
+
+| #   | Mensaje                                                              | Qué incluye                                                                                     |
+| --- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 8.1 | `perf: ask for the role of a user once per request`                  | `roleOf` con `once()`, que se olvida al cambiar una membresía, y 7 tests de consultas           |
+| 8.2 | `feat(realtime): reload the lists after a dropped connection`        | Recarga tras reconectar y su E2E cortando el WebSocket                                          |
+| 8.3 | `feat(ui): add error pages, failure toasts and page announcements`   | Página `errors/show`, toast para escrituras fallidas, anuncio de páginas, 13 tests + 3 Vitest   |
+| 8.4 | `feat(ui): add a loading skeleton and a skip link`                   | Skeleton a partir de 250 ms, salto al contenido y E2E reteniendo la petición                    |
+| 8.5 | `fix(a11y): return the focus after closing forms and the card modal` | `useInlineForm`, foco del modal, zonas `main` y `nav`, 6 tests de teclado                       |
+| 8.6 | `feat(ui): add empty states and support touch screens on the board`  | `EmptyState`, asa visible en táctil, listas que encajan al deslizar, E2E táctil y 7 tests móvil |
+| 8.7 | `feat(ui): add the landing page`                                     | Landing, movimiento reducido y auditoría axe de 12 páginas en claro y oscuro                    |
+| 8.8 | `docs: document the polish phase and prepare v0.8.0`                 | ADR-0010, README, CLAUDE.md, TESTING, PLAN, CHANGELOG                                           |
+
+**✅ Hecho cuando:** axe no encuentra nada en ninguna página, todo funciona con teclado y en un móvil, y un error nunca deja al usuario sin salida.
+
+**🎓 Qué tienes que saber explicar**
+
+- **Medir antes de optimizar**: el plan decía "añadir índices", pero al registrar las consultas vimos que ya existían. El problema real era preguntar el mismo rol 7 veces por petición.
+- **`once()` y su riesgo**: guarda el resultado durante la petición. Una caché de permisos debe borrarse cuando cambia el dato; por eso `Membership` la borra al guardarse o eliminarse. Sin eso, los tests fallaron de verdad.
+- **Por qué la clave es el id y no el objeto `User`**: en permisos se evita cualquier riesgo de confundir a dos personas.
+- **Página de error frente a toast** ([ADR-0010](adr/0010-error-pages-and-failure-toasts.md)): si no se puede mostrar una página, se explica con otra; si falla una escritura, el usuario sigue donde estaba. En un tablero compartido, que dos personas borren lo mismo es normal.
+- **Por qué la página de error no recibe datos compartidos**: cargar al usuario consulta la base de datos, que puede ser la causa del `500`.
+- **Por qué no usamos props diferidas para el skeleton**: añadirían una segunda petición para cargar justo lo más importante de la página.
+- **Reconexión**: Pusher no reenvía lo que te perdiste. Cuando `here` se ejecuta por segunda vez, sabemos que hubo un corte y recargamos las listas.
+- **Gestión del foco**: al cerrar algo, el elemento enfocado desaparece y el navegador vuelve al inicio de la página. Por eso devolvemos el foco a mano.
+- **Zonas (landmarks), salto al contenido y regiones `aria-live`**: cómo navega y qué oye una persona con lector de pantalla.
+- **`prefers-reduced-motion` y WCAG 2.2.2**: por eso la tarjeta de la landing se mueve una sola vez y no en bucle.
+- **Cómo se prueba un test**: quitamos cada arreglo a propósito para ver que su test falla. Así descubrimos un test que no probaba nada y lo borramos.
 
 ## Fase 9 · Despliegue · `chore/deploy`
 

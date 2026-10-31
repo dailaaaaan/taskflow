@@ -28,7 +28,7 @@ TaskFlow lets teams organise work on Kanban boards and see each other's changes 
 - [x] Boards, lists and cards, with assignees and due dates
 - [x] Drag & drop of cards and lists (mouse, touch and keyboard) with optimistic updates
 - [x] Real-time collaboration and presence ("who is viewing")
-- [ ] Responsive, accessible UI with dark mode
+- [x] Responsive, accessible UI with dark mode
 - [ ] Production deployment with a demo account
 
 ## Tech stack
@@ -118,14 +118,14 @@ Without them everything works, except that other people's changes only appear af
 | Tests                         | Pest                      | `php artisan test`                    |
 | Frontend unit tests           | Vitest (via Vite+)        | `npm test`                            |
 | Browser tests (Chromium, axe) | Pest Browser + Playwright | `vendor/bin/pest --testsuite=Browser` |
-| Realtime E2E (two browsers)   | Playwright + local Reverb | `npm run e2e`                         |
+| E2E (live updates, touch)     | Playwright + local Reverb | `npm run e2e`                         |
 | **Everything but the E2E**    |                           | `composer ci:check`                   |
 
 The CI pipeline runs on every push and pull request:
 
 - **Quality**: style, static analysis, lint, type checking, frontend unit tests (Vitest) and a dependency audit (`composer audit`, `npm audit`)
 - **Tests**: the full Pest suite on PostgreSQL, including browser tests in headless Chromium, with PCOV coverage, a JUnit report published as a check run, and reports uploaded as artifacts
-- **Realtime E2E**: two browsers on the same board, against a local Reverb server
+- **Realtime E2E**: two browsers on the same board, a dropped connection, a real touch drag and held requests, against a local Reverb server
 - **Conventional commits**: every commit message in the pull request is validated
 
 The test strategy and the test inventory are documented in [`docs/TESTING.md`](docs/TESTING.md).
