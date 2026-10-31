@@ -1,0 +1,56 @@
+# Render Blueprint. `sync: false` values are secrets or personal settings: Render
+# asks for them once and they never appear in this file. See docs/DEPLOYMENT.md.
+services:
+    - type: web
+      name: taskflow
+      runtime: docker
+      plan: free
+      region: frankfurt
+      healthCheckPath: /up
+      # Only code that passed CI reaches production.
+      autoDeployTrigger: checksPass
+      envVars:
+          - key: APP_NAME
+            value: TaskFlow
+          - key: APP_ENV
+            value: production
+          - key: APP_DEBUG
+            value: 'false'
+          # Render's generateValue lacks the `base64:` prefix that Laravel expects.
+          - key: APP_KEY
+            sync: false
+          # The direct connection of Neon, without `-pooler` in the host.
+          - key: DB_URL
+            sync: false
+          - key: DB_CONNECTION
+            value: pgsql
+          - key: LOG_CHANNEL
+            value: stderr
+          - key: LOG_LEVEL
+            value: info
+          - key: SESSION_DRIVER
+            value: database
+          - key: SESSION_SECURE_COOKIE
+            value: 'true'
+          - key: CACHE_STORE
+            value: database
+          # There is no worker process on the free plan.
+          - key: QUEUE_CONNECTION
+            value: sync
+          # Render blocks outbound SMTP on the free plan, so no email can leave.
+          - key: MAIL_MAILER
+            value: log
+          - key: REGISTRATION_ENABLED
+            value: 'false'
+          - key: DEMO_ENABLED
+            value: 'true'
+          - key: BROADCAST_CONNECTION
+            value: pusher
+          - key: PUSHER_APP_ID
+            sync: false
+          - key: PUSHER_APP_KEY
+            sync: false
+          - key: PUSHER_APP_SECRET
+            sync: false
+          - key: PUSHER_APP_CLUSTER
+            sync: false
