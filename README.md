@@ -13,6 +13,8 @@
 
 **[Try the live demo](https://taskflow-d561.onrender.com)**: one click, no sign-up.
 
+<img src="docs/images/realtime.gif" alt="Demo User and Sam Taylor on the same board in two browsers: a card moved or added by one appears for the other in under a second" width="100%">
+
 </div>
 
 > 🚧 **Work in progress.** Track progress in the [roadmap](#roadmap) and the [changelog](CHANGELOG.md).
@@ -29,6 +31,17 @@ TaskFlow lets teams organise work on Kanban boards and see each other's changes 
 2. To see real-time collaboration, open the same address in a private window, click **join as Sam** and move a card in either window.
 
 The demo runs on free plans: after 15 idle minutes, the next visit takes about a minute to wake the server. Every start puts the demo workspace back to its original state.
+
+## Screenshots
+
+<picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/board-dark.png">
+    <img src="docs/images/board-light.png" alt="A board with three lists of cards, and the avatar of the other member who is viewing it">
+</picture>
+
+|                                                         Card details                                                          |                                                  Roles and invite links                                                  |                                          On a phone                                          |
+| :---------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: |
+| <img src="docs/images/card-details.png" alt="Card details dialog with title, description, assignee and due date" width="340"> | <img src="docs/images/team-roles.png" alt="Team settings with the admin and member roles, and invite links" width="340"> | <img src="docs/images/board-phone.png" alt="The board on a phone, in dark mode" width="160"> |
 
 ## Roadmap
 
