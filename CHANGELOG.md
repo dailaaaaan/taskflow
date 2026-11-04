@@ -7,13 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-04
+
 ### Added
 
+- Public demo at <https://taskflow-d561.onrender.com>, on Render, Neon and Pusher.
 - Production image with FrankenPHP, running as a non-root user, and a Render Blueprint ([ADR-0011](docs/adr/0011-free-production-hosting.md)).
 - CI job that builds the image, starts it with the memory of the free plan and opens the demo from outside.
 - One-click public demo, with two accounts to try live updates in two windows. The workspace goes back to its original state on every start, and is rebuilt if a visitor deletes it.
 - `REGISTRATION_ENABLED` switch, because Render's free plan blocks SMTP and new accounts have to verify their email.
-- Deployment guide in `docs/DEPLOYMENT.md`.
+- Deployment guide in `docs/DEPLOYMENT.md`, with the errors that a mistyped value causes on Render and how to fix each one.
 
 ### Changed
 
@@ -205,7 +208,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Possible null dereference when rendering a passkey's creation date in security settings.
 
-[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/dailaaaaan/taskflow/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/dailaaaaan/taskflow/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/dailaaaaan/taskflow/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/dailaaaaan/taskflow/compare/v0.5.0...v0.6.0
