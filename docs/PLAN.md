@@ -313,12 +313,18 @@ Issue: [#14](https://github.com/dailaaaaan/taskflow/issues/14) · Milestone: v0.
 
 ## Fase 10 · README final · `docs/readme`
 
-| #    | Mensaje                                          |
-| ---- | ------------------------------------------------ |
-| 10.1 | `docs: add screenshots and demo GIF`             |
-| 10.2 | `docs: finalize README and changelog for v1.0.0` |
+| #    | Mensaje                                                          | Qué incluye                                                                                                                                        |
+| ---- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 10.0 | `build(deps): upgrade to TypeScript 6 and pin @types/node to 24` | Rama `chore/deps`: TypeScript 6, tipos de Node 24 como el CI y la imagen, Dependabot sin majors de `@types/node`. Antes se fusionó el #24 (iconos) |
+| 10.1 | `docs: add screenshots and demo GIF`                             |                                                                                                                                                    |
+| 10.2 | `docs: finalize README and changelog for v1.0.0`                 |                                                                                                                                                    |
 
 🏁 **Al final:** `git tag v1.0.0`, `git push origin v1.0.0` y una GitHub Release.
+
+**🎓 Qué tienes que saber explicar**
+
+- **Por qué TypeScript 6 necesita `"types": ["node"]`**: antes cargaba todos los paquetes `@types` instalados; ahora solo los que se piden. Sin los de Node, `playwright.config.ts` no conoce `process` ni `node:crypto`.
+- **Por qué no se fusionó `@types/node` 25**: los tipos tienen que describir el Node que de verdad se ejecuta (24 en el CI y en la imagen). Con los de 25, TypeScript aceptaría funciones que Node 24 no tiene.
 
 ## Extras posibles
 

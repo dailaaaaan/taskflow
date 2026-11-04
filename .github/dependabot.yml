@@ -38,3 +38,9 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    # The Node types must match the Node major that CI and the Dockerfile run.
+    # Raise all three together, by hand.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types:
+          - "version-update:semver-major"
