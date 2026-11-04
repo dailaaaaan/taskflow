@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- TypeScript 6 and `lucide-react` 0.577.
+- `@types/node` matches Node 24, the version that CI and the production image run, and Dependabot no longer proposes its major versions.
+
 ## [0.9.0] - 2026-11-04
 
 ### Added
