@@ -17,8 +17,6 @@
 
 </div>
 
-> 🚧 **Work in progress.** Track progress in the [roadmap](#roadmap) and the [changelog](CHANGELOG.md).
-
 ## Overview
 
 TaskFlow lets teams organise work on Kanban boards and see each other's changes as they happen. It is a full-stack portfolio project focused on what production applications need: authentication, relational data modelling, authorization, real-time updates and an automated quality pipeline.
@@ -43,17 +41,14 @@ The demo runs on free plans: after 15 idle minutes, the next visit takes about a
 | :---------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: |
 | <img src="docs/images/card-details.png" alt="Card details dialog with title, description, assignee and due date" width="340"> | <img src="docs/images/team-roles.png" alt="Team settings with the admin and member roles, and invite links" width="340"> | <img src="docs/images/board-phone.png" alt="The board on a phone, in dark mode" width="160"> |
 
-## Roadmap
+## Features
 
-- [x] Project foundation: CI pipeline, static analysis, architecture tests, Git hooks
-- [x] Authentication: registration, login, password reset, 2FA, passkeys and GitHub OAuth
-- [x] PostgreSQL schema: teams, memberships, boards, lists, cards
-- [x] Teams with **admin / member** roles and signed invite links
-- [x] Boards, lists and cards, with assignees and due dates
-- [x] Drag & drop of cards and lists (mouse, touch and keyboard) with optimistic updates
-- [x] Real-time collaboration and presence ("who is viewing")
-- [x] Responsive, accessible UI with dark mode
-- [x] Production deployment with a one-click public demo
+- **Teams with roles.** Admins manage the team, its members and its boards. Members work on the boards. Invite links are signed, expire after 7 days and can be revoked.
+- **Boards, lists and cards**, with descriptions, assignees and due dates.
+- **Drag & drop** of cards and lists with a mouse, a finger or the keyboard. A move shows at once and is undone if the server refuses it.
+- **Live collaboration.** Changes reach everyone on the board in under a second, and avatars show who else is viewing it.
+- **Accounts** with email verification, password reset, two-factor authentication, passkeys and optional GitHub login.
+- **Accessible and responsive**, in light and dark mode. Drag & drop is announced to screen readers, and every page is audited with axe in both colour schemes.
 
 ## Tech stack
 
@@ -66,6 +61,7 @@ The demo runs on free plans: after 15 idle minutes, the next visit takes about a
 | Testing  | Pest 5 (unit, feature, architecture, browser), Vitest, Playwright               |
 | Quality  | Larastan (level 8), Pint, Vite+ (Oxlint, Oxfmt), commitlint, Husky              |
 | CI/CD    | GitHub Actions, Dependabot                                                      |
+| Hosting  | Docker image with FrankenPHP on Render, PostgreSQL on Neon                      |
 
 ## Architecture
 
@@ -79,9 +75,9 @@ flowchart LR
     end
 
     subgraph Laravel
-        R["Routes"] --> C["Controllers"]
-        C --> FR["Form Requests<br/>validation"]
-        C --> P["Policies<br/>authorization"]
+        R["Routes"] --> P["Policies<br/>authorization"]
+        P --> FR["Form Requests<br/>validation"]
+        FR --> C["Controllers"]
         C --> A["Actions<br/>business logic"]
         A --> DB[("PostgreSQL")]
         A --> E["Broadcast events"]
@@ -93,14 +89,24 @@ flowchart LR
     Echo --> UI
 ```
 
-Every request goes through the same layers: **validate** (Form Request), **authorize** (Policy), **execute** (Action) and **notify** (Event). Architecture tests enforce this layering, so it cannot erode over time. See [`CLAUDE.md` §5](CLAUDE.md#5-architecture-rules) and the [architecture decision records](docs/adr/).
+Every request goes through the same layers: **authorize** (Policy, declared on the route), **validate** (Form Request), **execute** (Action) and **notify** (Event). Authorization comes first, so someone without access gets a `403` and never learns which fields were wrong. Architecture tests enforce this layering, so it cannot erode over time. See [`CLAUDE.md` §5](CLAUDE.md#5-architecture-rules).
+
+### Design decisions
+
+Each one is recorded with its context and trade-offs in an [architecture decision record](docs/adr/).
+
+- **Authorization through the board.** Lists and cards have no policy of their own: their routes are nested under the board, so one check covers them, and an id from another board is a `404` ([ADR-0007](docs/adr/0007-authorize-lists-and-cards-through-the-board.md)).
+- **Integer positions with gaps.** Moving a card usually writes a single row. Positions are spread out again inside a transaction only when a gap runs out ([ADR-0003](docs/adr/0003-integer-gap-positions.md)).
+- **One reducer for every change.** The same pure function applies a user's own optimistic moves and the events of other users, so both paths behave the same and are unit tested once ([ADR-0008](docs/adr/0008-drag-and-drop-with-optimistic-inertia-visits.md), [ADR-0009](docs/adr/0009-realtime-board-events.md)).
+- **Failures that fit the request.** A failed visit shows an error page that works even with the database down, and a failed write stays on its page with a toast ([ADR-0010](docs/adr/0010-error-pages-and-failure-toasts.md)).
+- **Free hosting, tested like production.** CI builds the production image, starts it with the memory of the free plan and opens the demo from outside ([ADR-0011](docs/adr/0011-free-production-hosting.md)).
 
 ## Getting started
 
 ### Prerequisites
 
 - PHP 8.3+ and Composer 2 ([Laravel Herd](https://herd.laravel.com) is the easiest option on Windows and macOS)
-- Node.js 22+
+- Node.js 24, the version that CI and the production image use
 - Docker (runs PostgreSQL 17)
 
 ### Installation

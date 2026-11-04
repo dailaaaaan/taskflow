@@ -92,7 +92,7 @@ Updated at the end of each phase.
 | 9 · Deployment  | Browser (`DemoJourneyTest`)                                  | 4     | From the landing page to a board in one click, joining as the teammate, axe, the explanation when a demo profile cannot change                                                                                                        |
 | 9 · Deployment  | Smoke (`docker/smoke-test.sh`)                               | 1     | The real image, with the memory of the free plan: health check, no `/register`, built assets served, one click on the demo opens its board                                                                                            |
 
-**Total after phase 9: 387 tests** (341 Pest + 41 Vitest + 5 E2E), plus the smoke test of the production image.
+**Total at v1.0.0: 387 tests** (341 Pest + 41 Vitest + 5 E2E), plus the smoke test of the production image.
 
 The E2E tests run a local [Reverb](https://reverb.laravel.com) server with throwaway keys, so the real Pusher driver and `pusher-js` are exercised with no external network and no secrets. They reseed the `taskflow_test` database, never the development one. Slow and failed requests are held or aborted by the test itself, never with sleeps.
 

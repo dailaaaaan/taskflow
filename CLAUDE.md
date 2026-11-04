@@ -113,10 +113,10 @@ The owner (**@dailaaaaan**) is a junior developer building a portfolio project. 
 ## 5. Architecture rules
 
 ```
-Route ─► Controller ─► FormRequest ─► Policy ─► Action ─► Eloquent ─► PostgreSQL
-            │            (validate)   (authorize) (logic)      │
-            │                                                  └─► Event ─► Pusher ─► Echo (other clients)
-            └─► Inertia::render(page, props)   |   back() + partial reload (board moves)
+Route ─► Policy ─► FormRequest ─► Controller ─► Action ─► Eloquent ─► PostgreSQL
+      (->can())    (validate)          │        (logic)        │
+                                       │                       └─► Event ─► Pusher ─► Echo (other clients)
+                                       └─► Inertia::render(page, props)   |   back() + partial reload (board moves)
 ```
 
 **Backend**

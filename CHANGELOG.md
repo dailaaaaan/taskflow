@@ -7,14 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-04
+
+The first stable release: the MVP is complete and deployed.
+
 ### Added
 
 - README screenshots in light and dark mode, and a GIF of two people working on the same board live.
+- README sections on the features and the main design decisions.
 
 ### Changed
 
 - TypeScript 6 and `lucide-react` 0.577.
 - `@types/node` matches Node 24, the version that CI and the production image run, and Dependabot no longer proposes its major versions.
+
+### Fixed
+
+- The architecture diagrams in the README and `CLAUDE.md` put validation before authorization. Authorization runs first, so someone without access gets a `403` and never a validation error.
 
 ## [0.9.0] - 2026-11-04
 
@@ -217,7 +226,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Possible null dereference when rendering a passkey's creation date in security settings.
 
-[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/dailaaaaan/taskflow/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/dailaaaaan/taskflow/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/dailaaaaan/taskflow/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/dailaaaaan/taskflow/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/dailaaaaan/taskflow/compare/v0.6.0...v0.7.0
