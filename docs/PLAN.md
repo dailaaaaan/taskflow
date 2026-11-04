@@ -4,19 +4,19 @@
 
 ## Progreso
 
-| Fase                                            | Rama                 | Estado      |
-| ----------------------------------------------- | -------------------- | ----------- |
-| 0 · Preparación del entorno                     | —                    | ✅          |
-| 1 · Esqueleto y estándares profesionales        | `chore/setup`        | ✅ v0.1.0   |
-| 2 · Base de datos y modelos                     | `feat/database`      | ✅ v0.2.0   |
-| 3 · Autenticación (GitHub y tests de navegador) | `feat/auth`          | ✅ v0.3.0   |
-| 4 · Equipos y roles                             | `feat/teams`         | ✅ v0.4.0   |
-| 5 · Tableros, listas y tarjetas                 | `feat/boards`        | ✅ v0.5.0   |
-| 6 · Drag & drop                                 | `feat/drag-and-drop` | ✅ v0.6.0   |
-| 7 · Tiempo real                                 | `feat/realtime`      | ✅ v0.7.0   |
-| 8 · Pulido de UI y accesibilidad                | `feat/polish`        | ✅ v0.8.0   |
-| 9 · Despliegue                                  | `chore/deploy`       | 🔄 En curso |
-| 10 · README final de portfolio                  | `docs/readme`        | ⬜          |
+| Fase                                            | Rama                 | Estado    |
+| ----------------------------------------------- | -------------------- | --------- |
+| 0 · Preparación del entorno                     | —                    | ✅        |
+| 1 · Esqueleto y estándares profesionales        | `chore/setup`        | ✅ v0.1.0 |
+| 2 · Base de datos y modelos                     | `feat/database`      | ✅ v0.2.0 |
+| 3 · Autenticación (GitHub y tests de navegador) | `feat/auth`          | ✅ v0.3.0 |
+| 4 · Equipos y roles                             | `feat/teams`         | ✅ v0.4.0 |
+| 5 · Tableros, listas y tarjetas                 | `feat/boards`        | ✅ v0.5.0 |
+| 6 · Drag & drop                                 | `feat/drag-and-drop` | ✅ v0.6.0 |
+| 7 · Tiempo real                                 | `feat/realtime`      | ✅ v0.7.0 |
+| 8 · Pulido de UI y accesibilidad                | `feat/polish`        | ✅ v0.8.0 |
+| 9 · Despliegue                                  | `chore/deploy`       | ✅ v0.9.0 |
+| 10 · README final de portfolio                  | `docs/readme`        | ⬜        |
 
 ## Decisiones tomadas
 
@@ -290,9 +290,11 @@ Issue: [#14](https://github.com/dailaaaaan/taskflow/issues/14) · Milestone: v0.
 | 9.2 | `chore(deploy): add production configuration`                       | `render.yaml`, confianza en el proxy de Render y 2 tests                                           |
 | 9.3 | `build: add production Dockerfile`                                  | Imagen con FrankenPHP sin root, arranque, smoke test y job nuevo en el CI                          |
 | 9.4 | `docs: document the production deployment`                          | ADR-0011, `docs/DEPLOYMENT.md`, README, SECURITY, CLAUDE.md, TESTING, PLAN, CHANGELOG              |
-| 9.5 | `docs: add live demo link to README`                                | Después de desplegar: enlace real, CHANGELOG `[0.9.0]` y roadmap                                   |
+| 9.5 | `docs: add the live demo and deployment troubleshooting`            | Rama `docs/live-demo`: enlace real, errores del primer despliegue en la guía, CHANGELOG `[0.9.0]`  |
 
 **✅ Hecho cuando:** la demo funciona en la dirección pública, con avatares y cambios en vivo entre dos ventanas.
+
+🌐 **En producción:** <https://taskflow-d561.onrender.com> (Render y Neon en Frankfurt, Pusher en `eu`).
 
 **🎓 Qué tienes que saber explicar**
 
@@ -305,6 +307,9 @@ Issue: [#14](https://github.com/dailaaaaan/taskflow/issues/14) · Milestone: v0.
 - **Por qué el registro está apagado en producción**: Render gratis bloquea SMTP, y saltarse la verificación permitiría capturar cuentas a través del login con GitHub.
 - **Limitaciones del plan gratuito**: arranque en frío de un minuto tras 15 minutos sin visitas, y por qué eso también restaura la demo.
 - **Smoke test**: prueba la imagen real desde fuera, como su primer visitante, y lo comprobamos también viendo que falla cuando debe.
+- **Leer el log de un despliegue fallido**: `start.sh` se para en el primer paso que falla. Los dos errores reales (`popostgresql://` y dos cadenas pegadas una dentro de otra) se encontraron leyendo la primera línea de error. Los otros dos de la guía los provocamos a propósito en local.
+- **Qué hacer si se filtra un secreto**: cambiarlo donde nace (Neon) y pegar el nuevo. Borrar el mensaje no basta: ya está copiado en otros sitios. Los logs pueden contener la contraseña.
+- **Cómo se comprobó Pusher real sin ver el secret**: el servidor firma la suscripción con el secret, y Pusher solo la acepta si coincide con el suyo. Que la acepte demuestra que `key` y `secret` son correctos.
 
 ## Fase 10 · README final · `docs/readme`
 

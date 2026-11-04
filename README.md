@@ -11,6 +11,8 @@
 ![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![PHPStan level 8](https://img.shields.io/badge/PHPStan-level%208-brightgreen)
 
+**[Try the live demo](https://taskflow-d561.onrender.com)**: one click, no sign-up.
+
 </div>
 
 > 🚧 **Work in progress.** Track progress in the [roadmap](#roadmap) and the [changelog](CHANGELOG.md).
@@ -18,6 +20,15 @@
 ## Overview
 
 TaskFlow lets teams organise work on Kanban boards and see each other's changes as they happen. It is a full-stack portfolio project focused on what production applications need: authentication, relational data modelling, authorization, real-time updates and an automated quality pipeline.
+
+## Live demo
+
+<https://taskflow-d561.onrender.com>
+
+1. Click **Try the live demo** to open a shared board.
+2. To see real-time collaboration, open the same address in a private window, click **join as Sam** and move a card in either window.
+
+The demo runs on free plans: after 15 idle minutes, the next visit takes about a minute to wake the server. Every start puts the demo workspace back to its original state.
 
 ## Roadmap
 
@@ -29,7 +40,7 @@ TaskFlow lets teams organise work on Kanban boards and see each other's changes 
 - [x] Drag & drop of cards and lists (mouse, touch and keyboard) with optimistic updates
 - [x] Real-time collaboration and presence ("who is viewing")
 - [x] Responsive, accessible UI with dark mode
-- [ ] Production deployment with a demo account
+- [x] Production deployment with a one-click public demo
 
 ## Tech stack
 
@@ -109,7 +120,7 @@ Without them everything works, except that other people's changes only appear af
 
 ## Deployment
 
-TaskFlow runs for free on Render, Neon and Pusher, from a [production image](Dockerfile) that CI builds and tests on every pull request. Step-by-step instructions are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md), and the reasons in [ADR-0011](docs/adr/0011-free-production-hosting.md).
+TaskFlow runs for free on Render, Neon and Pusher, all in the EU, from a [production image](Dockerfile) that CI builds and tests on every pull request. Render deploys `main` once CI passes. Step-by-step instructions and fixes for common failures are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md), and the reasons in [ADR-0011](docs/adr/0011-free-production-hosting.md).
 
 ## Quality and testing
 

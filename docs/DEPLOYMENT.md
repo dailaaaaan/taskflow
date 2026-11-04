@@ -1,6 +1,6 @@
 # Deployment
 
-TaskFlow runs for free on [Render](https://render.com) (web), [Neon](https://neon.com) (PostgreSQL) and [Pusher](https://pusher.com) (live updates). The reasons are in [ADR-0011](adr/0011-free-production-hosting.md).
+TaskFlow runs for free on [Render](https://render.com) (web), [Neon](https://neon.com) (PostgreSQL) and [Pusher](https://pusher.com) (live updates). The reasons are in [ADR-0011](adr/0011-free-production-hosting.md). The live instance is at <https://taskflow-d561.onrender.com>.
 
 | Piece       | Where                                                                                                             |
 | ----------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -27,6 +27,21 @@ Use the **same region** everywhere, because each page makes several database que
 
 Render deploys `main` after CI passes. `APP_URL` comes from Render's `RENDER_EXTERNAL_URL`.
 
+## When a deploy fails
+
+`docker/start.sh` stops at the first step that fails, and Render keeps the previous version running. Open the failed deploy in Render and read the end of its log: the first error names the value to fix. These are the errors that a mistyped value causes, and every one of them has happened or been reproduced with this image:
+
+| The log says                                                          | Cause                                                              | Fix                                                   |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------- |
+| `Unsupported driver [...]`                                            | `DB_URL` does not start with `postgresql://`                       | Clear the field and paste the connection string again |
+| `could not translate host name`                                       | `DB_URL` is cut short, or holds two strings pasted into each other | Clear the field and paste the connection string once  |
+| `password authentication failed`                                      | The Neon password was reset after the string was copied            | Copy the current string from Neon's **Connect**       |
+| `Failed to create broadcaster for connection "pusher"` … `null given` | A `PUSHER_*` value is missing: `render.yaml` turns live updates on | Fill in the four values from Pusher's **App Keys**    |
+
+Fix the value in **Environment** and deploy again.
+
+Some database errors print the whole connection string, password included. Check a log before sharing it, and if a password leaks, reset it in Neon (**Roles → Reset password**) and paste the new string into Render.
+
 ## Optional settings
 
 | Setting      | How                                                                                                                                                                          |
@@ -38,7 +53,7 @@ Render deploys `main` after CI passes. `APP_URL` comes from Render's `RENDER_EXT
 ## What to expect from the free plans
 
 - **Cold starts.** Render stops the instance after 15 idle minutes, and the next visitor waits about a minute on a loading page. Neon also sleeps after 5 idle minutes.
-- **Resources.** Measured locally with the limits of the free plan (512 MB and 0.1 CPU) and a local database: the image starts in about 14 seconds, uses about 50 MB of memory, and answers pages in 0.03 to 0.3 seconds. Neon adds the network time of each query.
+- **Resources.** Measured locally with the limits of the free plan (512 MB and 0.1 CPU) and a local database: the image starts in about 14 seconds, uses about 50 MB of memory, and answers pages in 0.03 to 0.3 seconds. On the live site, measured from Spain once awake, a board opens in 0.25 to 0.4 seconds and a change reaches the other window in under a second.
 - **Demo resets.** Each start puts the demo workspace back to its original state, so damage from visitors does not last. If someone deletes it all, the next click on the demo rebuilds it.
 - **Quotas.** Render gives 750 instance hours per month, and Neon 100 compute hours. Stopping when idle keeps both well under the limit.
 - **No shell.** Render offers no console on the free plan, so everything that must run on a deploy lives in `docker/start.sh`.
