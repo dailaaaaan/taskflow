@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Two Rollup binaries left over from the starter kit. Vite+ builds with Rolldown, so nothing loaded them.
+
 ## [1.0.0] - 2026-11-04
 
 The first stable release: the MVP is complete and deployed.

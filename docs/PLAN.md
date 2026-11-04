@@ -334,6 +334,17 @@ Issue: [#15](https://github.com/dailaaaaan/taskflow/issues/15) · Milestone: v1.
 - **Por qué los ADR no se reescriben**: cuentan la decisión tal como se tomó, con lo que se sabía entonces. Si una decisión cambia, se escribe un ADR nuevo que sustituye al anterior.
 - **Por qué no se fusionó `@types/node` 25**: los tipos tienen que describir el Node que de verdad se ejecuta (24 en el CI y en la imagen). Con los de 25, TypeScript aceptaría funciones que Node 24 no tiene.
 
+## Mantenimiento después de v1.0.0
+
+| Mensaje                                      | Qué incluye                                                                                                      |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `build(deps): remove unused Rollup binaries` | Rama `chore/remove-rollup-binaries`: fuera dos binarios de Rollup del kit inicial. Dependabot cierra el #29 solo |
+
+**🎓 Qué tienes que saber explicar**
+
+- **Por qué había binarios nativos en `optionalDependencies`**: por un fallo conocido de npm, a veces no instala el binario del sistema operativo en el que se ejecuta si el `package-lock.json` se generó en otro. El kit los fija para que el build funcione igual en Windows y en Linux. Los de Tailwind y lightningcss siguen haciendo falta. Los de Rollup no, porque Vite+ compila con Rolldown.
+- **Cómo se comprueba que un paquete no se usa**: `npm ls <paquete>` enseña quién depende de él. Si solo aparece el propio proyecto y el código no lo importa, sobra.
+
 ## Extras posibles
 
 - API REST pública con Sanctum y documentación OpenAPI (reutiliza las Actions y las Policies)
